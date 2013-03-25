@@ -68,7 +68,7 @@
 			} else if (is_bool($num)) {
 				return MNumber::parseBool($num);
 			} else if (is_string($num)) {
-				//
+				return MNumber::parseInt($num);
 			}
 		}
 		

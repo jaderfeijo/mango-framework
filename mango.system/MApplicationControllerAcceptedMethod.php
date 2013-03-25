@@ -43,7 +43,6 @@
 		
 		protected $method;
 		protected $contentTypes;
-		protected $parameters;
 		protected $fields;
 		
 		public function __construct(MString $method) {
@@ -51,7 +50,6 @@
 			
 			$this->method = $method;
 			$this->contentTypes = new MMutableArray();
-			$this->parameters = new MMutableArray();
 			$this->fields = new MMutableArray();
 		}
 		
@@ -69,13 +67,6 @@
 		 */
 		public function contentTypes() {
 			return $this->contentTypes;
-		}
-		
-		/**
-		 * @return MArray
-		 */
-		public function parameters() {
-			return $this->parameters;
 		}
 		
 		/**
@@ -111,27 +102,6 @@
 		/**
 		 * @return void
 		 */
-		public function addParameter(MApplicationControllerParameter $parameter) {
-			$this->parameters->addObject($parameter);
-		}
-		
-		/**
-		 * @return void
-		 */
-		public function removeParameter(MApplicationControllerParameter $parameter) {
-			$this->parameters->removeObject($parameter);
-		}
-		
-		/**
-		 * @return void
-		 */
-		public function removeAllParameters() {
-			$this->parameters->removeAllObjects();
-		}
-		
-		/**
-		 * @return void
-		 */
 		public function addField(MApplicationControllerField $field) {
 			$this->fields->addObject($field);
 		}
@@ -148,18 +118,6 @@
 		 */
 		public function removeAllFields() {
 			$this->fields->removeAllObjects();
-		}
-		
-		/**
-		 * @return MApplicationControllerParameter
-		 */
-		public function parameterWithName(MString $name) {
-			foreach ($this->parameters()->toArray() as $parameter) {
-				if ($parameter->name()->equals($name)) {
-					return $parameter;
-				}
-			}
-			return null;
 		}
 		
 		/**

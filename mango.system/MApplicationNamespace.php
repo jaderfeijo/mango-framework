@@ -51,8 +51,8 @@
 		protected $name;
 		protected $parentNamespace;
 		protected $childNamespaces;
-		protected $viewControllers;
-		protected $mainViewController;
+		protected $controllers;
+		protected $mainController;
 		protected $errorViewControllerClass;
 		
 		/**
@@ -66,8 +66,8 @@
 			$this->name = ($name ? $name : S(""));
 			$this->parentNamespace = $parentNamespace;
 			$this->childNamespaces = new MMutableArray();
-			$this->viewControllers = new MMutableArray();
-			$this->mainViewController = null;
+			$this->controllers = new MMutableArray();
+			$this->mainController = null;
 			$this->errorViewControllerClass = null;
 		}
 		
@@ -103,8 +103,8 @@
 		 *
 		 * @return MArray
 		 */
-		public function viewControllers() {
-			return $this->viewControllers;
+		public function controllers() {
+			return $this->controllers;
 		}
 		
 		/**
@@ -112,8 +112,8 @@
 		 *
 		 * @return void
 		 */
-		public function setMainViewController(MApplicationController $mainViewController) {
-			$this->mainViewController = $mainViewController;
+		public function setMainController(MApplicationController $mainController) {
+			$this->mainController = $mainController;
 		}
 		
 		/**
@@ -121,8 +121,8 @@
 		 *
 		 * @return MApplicationController
 		 */
-		public function mainViewController() {
-			return $this->mainViewController;
+		public function mainController() {
+			return $this->mainController;
 		}
 		
 		/**
@@ -191,8 +191,8 @@
 		 *
 		 * @return void
 		 */
-		public function addViewController(MApplicationController $controller) {
-			$this->viewControllers->addObject($controller);
+		public function addController(MApplicationController $controller) {
+			$this->controllers->addObject($controller);
 		}
 		
 		/**
@@ -200,8 +200,8 @@
 		 *
 		 * @return void
 		 */
-		public function removeViewController(MApplicationController $controller) {
-			$this->viewControllers->removeObject($controller);
+		public function removeController(MApplicationController $controller) {
+			$this->controllers->removeObject($controller);
 		}
 		
 		/**
@@ -209,8 +209,8 @@
 		 *
 		 * @return MApplicationController
 		 */
-		public function viewControllerForName(MString $name) {
-			foreach ($this->viewControllers()->toArray() as $controller) {
+		public function controllerForName(MString $name) {
+			foreach ($this->controllers()->toArray() as $controller) {
 				if ($controller->name()->equals($name)) {
 					return $controller;
 				}
@@ -228,7 +228,7 @@
 			
 			if ($path->count() > 0) {
 				$name = $path->objectAtIndex(0);
-				$controller = $this->viewControllerForName($name);
+				$controller = $this->controllerForName($name);
 				if (!$controller) {
 					$namespace = $this->childNamespaceWithName($name);
 					if ($namespace) {
@@ -236,7 +236,7 @@
 					}
 				}
 			} else {
-				$controller = $this->mainViewController();
+				$controller = $this->mainController();
 			}
 			
 			$viewController = null;
@@ -245,9 +245,47 @@
 				$parameters = $path->subarrayFromIndex(1);
 				$reflectionClass = MObject::reflectionClass($controller->controllerClassName());
 				$reflectionConstructor = $reflectionClass->getMethod("__construct");
+				
+				// validate number of parameters
+				if ($controller->parameters()->count() != $reflectionConstructor->getNumberOfParameters()) {
+					throw new MException(Sf("The number of parameters in the manifest doesn't match the number of parameters declared in the constructor for the '%s' class", $controller->controllerClassName()));
+				}
+				if ($controller->requiredParameters()->count() != $reflectionConstructor->getNumberOfRequiredParameters()) {
+					throw new MException(Sf("The number of required parameters in the manifest doesn't match the number of required parameters declared in the constructor for the '%s' class", $controller->controllerClassName()));
+				}
+				
 				if ($parameters->count() >= $reflectionConstructor->getNumberOfRequiredParameters()) {
 					if ($parameters->count() > 0) {
-						$viewController = $reflectionClass->newInstanceArgs($parameters->toArray());
+						$formattedParameters = new MMutableArray();
+						for ($i = 0; $i < $parameters->count(); $i++) {
+							$controllerParameter = $controller->parameters()->objectAtIndex($i);
+							$parameterValue = $parameters->objectAtIndex($i);
+							$parameterObject = null;
+							if ($controllerParameter->type() == MApplicationControllerParameter::StringType) {
+								$parameterObject = $parameterValue;
+							} else if ($controllerParameter->type() == MApplicationControllerParameter::IntegerType) {
+								$parameterObject = MNumber::parseInt($parameterValue);
+							} else if ($controllerParameter->type() == MApplicationControllerParameter::FloatType) {
+								$parameterObject = MNumber::parseFloat($parameterValue);
+							} else if ($controllerParameter->type() == MApplicationControllerParameter::BooleanType) {
+								$parameterObject = MNumber::parseBool($parameterValue);
+							} else if ($controllerParameter->type() == MApplicationControllerParameter::DateType) {
+								$parameterObject = MDate::parseString($parameterValue);
+							} else if ($controllerParameter->type() == MApplicationControllerParameter::BinaryType) {
+								$parameterObject = MData::parseBase64String($parameterValue);
+							} else if ($controllerParameter->type() == MApplicationControllerParameter::ArrayType) {
+								$parameterObject = $parameterValue->componentsSeparatedByString(S("|"));
+							} else if ($controllerParameter->type() == MApplicationControllerParameter::DictionaryType) {
+								$parameterObject = MDictionary::parseString($parameterValue);
+							}
+							
+							if ($parameterObject) {
+								$formattedParameters->addObject($parameterObject);
+							} else {
+								throw new MException(Sf("Unknown error while parsing parameter named '%s'", $controllerParameter->name()));
+							}
+						}
+						$viewController = $reflectionClass->newInstanceArgs($formattedParameters->toArray());
 					} else {
 						$viewController = $reflectionClass->newInstance();
 					}

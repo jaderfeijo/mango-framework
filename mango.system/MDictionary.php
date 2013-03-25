@@ -42,6 +42,24 @@
 	 */
 	class MDictionary extends MObject {
 		
+		/**
+		 * 
+		 * @param MString $dictString
+		 * 
+		 * @return MDictionary
+		 */
+		public static function parseString(MString $dictString) {
+			$arr = $dictString->componentsSeparatedByString(S("|"));
+			$dict = new MMutableDictionary();
+			foreach ($arr->toArray() as $dictKeyPair) {
+				$dictKeyPairArr = $dictKeyPair->componentsSeparatedByString(S(":"));
+				$key = $dictKeyPairArr->objectAtIndex(0)->urlDecodedString();
+				$value = $dictKeyPairArr->objectAtIndex(1)->urlDecodedString();
+				$dict->setObjectForKey($key, $value);
+			}
+			return $dict;
+		}
+		
 		//
 		// ************************************************************
 		//
@@ -178,9 +196,11 @@
 		 */
 		public function toString() {
 			$string = new MMutableString();
-			$string->appendString(S("<MDictionary>:\n"));
 			foreach ($this->allKeys()->toArray() as $key) {
-				$string->appendFormat("[%s] => [%s]\n", (string)$key, (string)$this->objectForKey($key));
+				$string->appendFormat("%s:%s", urlencode((string)$key), urlencode((string)$this->objectForKey($key)));
+				if (!$this->allKeys()->isLastObject($key)) {
+					$string->appendString(S("|"));
+				}
 			}
 			return $string;
 		}

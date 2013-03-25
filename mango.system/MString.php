@@ -248,6 +248,22 @@
 		
 		/**
 		 * 
+		 * @return MString
+		 */
+		public function urlEncodedString() {
+			return new MString(urlencode($this->stringValue()));
+		}
+		
+		/**
+		 * 
+		 * @return MString
+		 */
+		public function urlDecodedString() {
+			return new MString(urldecode($this->stringValue()));
+		}
+		
+		/**
+		 * 
 		 *
 		 * @return MArray
 		 */

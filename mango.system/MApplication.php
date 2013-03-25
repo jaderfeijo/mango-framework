@@ -114,11 +114,11 @@
 			$namespace->setErrorViewControllerClass(S($namespaceElement['errorClass']));
 			
 			foreach ($namespaceElement as $element) {
-				if ($element->getName() == "viewcontroller") {
+				if ($element->getName() == "controller") {
 					if (is_null($element['name'])) {
-						$namespace->setMainViewController($this->parseApplicationController($element));
+						$namespace->setMainController($this->parseControllerElement($element));
 					} else {
-						$namespace->addViewController($this->parseApplicationController($element));
+						$namespace->addController($this->parseControllerElement($element));
 					}
 				} else if ($element->getName() == "namespace") {
 					$namespace->addChildNamespace($this->parseNamespaceElement($element));
@@ -135,43 +135,43 @@
 		 *
 		 * @return MApplicationController
 		 */
-		public function parseApplicationController($controllerElement) {
+		public function parseControllerElement($controllerElement) {
 			$controller = new MApplicationController(S($controllerElement['class']), S($controllerElement['name']));
 			
 			foreach ($controllerElement as $attributeElement) {
-				if ($attributeElement->getName() == "accept") {
+				if ($attributeElement->getName() == "parameters") {
+					foreach ($attributeElement as $parameterElement) {
+						$required = N(true);
+						if (!is_null($parameterElement['required'])) {
+							$required = MNumber::parseBool($parameterElement['required'])->boolValue();
+						}
+
+						if ($parameterElement['type'] == "String") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::StringType, $required));
+						} else if ($parameterElement['type'] == "Integer") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::IntegerType, $required));
+						} else if ($parameterElement['type'] == "Float") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::FloatType, $required));
+						} else if ($parameterElement['type'] == "Boolean") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::BooleanType, $required));
+						} else if ($parameterElement['type'] == "Date") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::DateType, $required));
+						} else if ($parameterElement['type'] == "Binary") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::Binary, $required));
+						} else if ($parameterElement['type'] == "Array") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::ArrayType, $required));
+						} else if ($parameterElement['type'] == "Dictionary") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::DictionaryType, $required));
+						} else {
+							throw new MParseErrorException(S("resources/manifest.xml"), null, Sf("Unknown type '%s'", $parameterElement['type']));
+						}
+					}
+				} else if ($attributeElement->getName() == "accept") {
 					$acceptedMethod = new MApplicationControllerAcceptedMethod(S($attributeElement['method']));
 					foreach ($attributeElement as $acceptElement) {
 						if ($acceptElement->getName() == "content-types") {
 							foreach ($acceptElement as $contentTypeElement) {
 								$acceptedMethod->addContentType(S($contentTypeElement));
-							}
-						} else if ($acceptElement->getName() == "parameters") {
-							foreach ($acceptElement as $parameterElement) {
-								$required = N(true);
-								if (!is_null($parameterElement['required'])) {
-									$required = MNumber::parseBool($parameterElement['required'])->boolValue();
-								}
-								
-								if ($parameterElement['type'] == "String") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::StringType, $required));
-								} else if ($parameterElement['type'] == "Integer") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::IntegerType, $required));
-								} else if ($parameterElement['type'] == "Float") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::FloatType, $required));
-								} else if ($parameterElement['type'] == "Boolean") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::BooleanType, $required));
-								} else if ($parameterElement['type'] == "Date") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::DateType, $required));
-								} else if ($parameterElement['type'] == "Binary") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::Binary, $required));
-								} else if ($parameterElement['type'] == "Array") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::ArrayType, $required));
-								} else if ($parameterElement['type'] == "Dictionary") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::DictionaryType, $required));
-								} else {
-									throw new MParseErrorException(S("resources/manifest.xml"), null, Sf("Unknown type '%s'", $parameterElement['type']));
-								}
 							}
 						} else if ($acceptElement->getName() == "fields") {
 							foreach ($acceptElement as $fieldElement) {

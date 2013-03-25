@@ -31,6 +31,7 @@
 	package('mango.data');
 	
 	import('mango.data.exceptions.*');
+	import('mango.system.xml.*');
 	import('mango.system.*');
 	
 	/**

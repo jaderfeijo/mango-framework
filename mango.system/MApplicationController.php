@@ -43,6 +43,7 @@
 		
 		protected $controllerClassName;
 		protected $name;
+		protected $parameters;
 		protected $acceptedMethods;
 		
 		public function __construct(MString $controllerClassName, MString $name = null) {
@@ -50,6 +51,7 @@
 			
 			$this->controllerClassName = $controllerClassName;
 			$this->name = ($name ? $name : S(""));
+			$this->parameters = new MMutableArray();
 			$this->acceptedMethods = new MMutableArray();
 		}
 		
@@ -72,11 +74,64 @@
 		/**
 		 * @return MArray
 		 */
+		public function parameters() {
+			return $this->parameters;
+		}
+		
+		/**
+		 * @return MArray
+		 */
+		public function requiredParameters() {
+			$requiredParameters = new MMutableArray();
+			foreach ($this->parameters()->toArray() as $parameter) {
+				if ($parameter->required()) {
+					$requiredParameters->addObject($parameter);
+				}
+			}
+			return $requiredParameters;
+		}
+		
+		/**
+		 * @return MArray
+		 */
 		public function acceptedMethods() {
 			return $this->acceptedMethods;
 		}
 		
 		/******************** Methods ********************/
+		
+		/**
+		 * @return void
+		 */
+		public function addParameter(MApplicationControllerParameter $parameter) {
+			$this->parameters->addObject($parameter);
+		}
+		
+		/**
+		 * @return void
+		 */
+		public function removeParameter(MApplicationControllerParameter $parameter) {
+			$this->parameters->removeObject($parameter);
+		}
+		
+		/**
+		 * @return void
+		 */
+		public function removeAllParameters() {
+			$this->parameters->removeAllObjects();
+		}
+		
+		/**
+		 * @return MApplicationControllerParameter
+		 */
+		public function parameterWithName(MString $name) {
+			foreach ($this->parameters()->toArray() as $parameter) {
+				if ($parameter->name()->equals($name)) {
+					return $parameter;
+				}
+			}
+			return null;
+		}
 		
 		/**
 		 * @return void
