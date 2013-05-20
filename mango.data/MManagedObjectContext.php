@@ -140,9 +140,47 @@
 		 * @return MArray An Array containing the parsed objects
 		 */
 		public function parseObjectsFromFile(MFile $file) {
+			$xml = simplexml_load_file($file->path()->stringValue());
+			return $this->parseObjectsFromXML($xml);
+		}
+		
+		/**
+		 * Parses one or more Managed Objects from inside the specified XML data
+		 * and inserts them into this Managed Object Context
+		 *
+		 * @param MData $data A data object containing the XML representation of the objects to be parsed
+		 *
+		 * @return MArray An Array containing the parsed objects
+		 */
+		public function parseObjectsFromData(MData $data) {
+			$xml = simplexml_load_string($data->getBytes());
+			return $this->parseObjectsFromXML($xml);
+		}
+		
+		/**
+		 * Parses one or more Managed Objects from inside the specified XML string
+		 * and inserts them into this Managed Object Context
+		 *
+		 * @param MString $string A string containing the XML representation of the objects to be parsed
+		 *
+		 * @return MArray An Array containing the parsed objects
+		 */
+		public function parseObjectsFromString(MString $string) {
+			$xml = simplexml_load_string($string->stringValue());
+			return $this->parseObjectsFromXML($xml);
+		}
+		
+		/**
+		 * Parses one or more Managed Objects from inside the specified SimpleXMLElement object
+		 * and inserts them into this Managed Object Context
+		 *
+		 * @param SimpleXMLElement $xml A SimpleXMLElement object containing the objects to be parsed
+		 *
+		 * @return MArray An Array containing the parsed objects
+		 */
+		public function parseObjectsFromXML(SimpleXMLElement $xml) {
 			$objects = new MMutableArray();
 			
-			$xml = simplexml_load_file($file->path()->stringValue());
 			foreach ($xml->children() as $xmlObject) {
 				$entityName = S($xmlObject->getName());
 				$entity = $this->entityForName($entityName);
