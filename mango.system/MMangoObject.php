@@ -42,7 +42,7 @@
 	 */
 	interface MMangoObject {
 		
-		const ORDERED_DESCENDING = -1
+		const ORDERED_DESCENDING = -1;
 		const ORDERED_SAME = 0;
 		const ORDERED_ASCENDING = 1;
 		
@@ -69,9 +69,9 @@
 		 *
 		 * @param MMangoObject $object An object to compare this object to
 		 *
-		 * @see ORDERED_DESCENDING
-		 * @see ORDERED_SAME
-		 * @see ORDERED_ASCENDING
+		 * @see MMangoObject::ORDERED_DESCENDING
+		 * @see MMangoObject::ORDERED_SAME
+		 * @see MMangoObject::ORDERED_ASCENDING
 		 *
 		 * @returns	int An integer containing a constant which identifies
 		 * how this object compares to the specified object

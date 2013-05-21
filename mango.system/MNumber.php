@@ -301,13 +301,13 @@
 		 */
 		public function compare(MMangoObject $object) {
 			if ($this->isGreaterThan($object)) {
-				return ORDERED_DESCENDING;
+				return MMangoObject::ORDERED_DESCENDING;
 			} else if ($this->equals($object)) {
-				return ORDERED_SAME;
+				return MMangoObject::ORDERED_SAME;
 			} else if ($this->isLessThan($object)) {
-				return ORDERED_ASCENDING;
+				return MMangoObject::ORDERED_ASCENDING;
 			} else {
-				return ORDERED_SAME;
+				return MMangoObject::ORDERED_SAME;
 			}
 		}
 		
