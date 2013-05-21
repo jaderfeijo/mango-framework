@@ -106,6 +106,15 @@
 			return $this->length;
 		}
 		
+		/******************** MObject ********************/
+		
+		/**
+		 *
+		 */
+		public function compare(MMangoObject $object) {
+			return N($this->length())->compare(N($object->length()));
+		}
+		
 	}
 	
 	MRange::_init();

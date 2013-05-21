@@ -138,6 +138,13 @@
 		}
 		
 		/**
+		 *
+		 */
+		public function compare(MMangoObject $object) {
+			return N($this->code())->compare(N($object->code()));
+		}
+		
+		/**
 		 * 
 		 */
 		public function className() {

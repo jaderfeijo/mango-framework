@@ -192,6 +192,13 @@
 		/******************** MObject Methods ********************/
 		
 		/**
+		 *
+		 */
+		public function compare(MMangoObject $object) {
+			return N($this->count())->compare(N($object->count()));
+		}
+		
+		/**
 		 * 
 		 */
 		public function toString() {

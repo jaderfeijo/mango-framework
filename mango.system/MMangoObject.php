@@ -42,6 +42,10 @@
 	 */
 	interface MMangoObject {
 		
+		const ORDERED_DESCENDING = -1
+		const ORDERED_SAME = 0;
+		const ORDERED_ASCENDING = 1;
+		
 		//
 		// ************************************************************
 		//
@@ -57,6 +61,22 @@
 		 * @return bool True if the objects are equal, false otherwise
 		 */
 		public function equals(MMangoObject $object);
+		
+		/**
+		 * Compares this object to the specified object and returns
+		 * a value specifying whether the object is smaller than, equal to
+		 * or greater than the object it is being called on
+		 *
+		 * @param MMangoObject $object An object to compare this object to
+		 *
+		 * @see ORDERED_DESCENDING
+		 * @see ORDERED_SAME
+		 * @see ORDERED_ASCENDING
+		 *
+		 * @returns	int An integer containing a constant which identifies
+		 * how this object compares to the specified object
+		 */
+		public function compare(MMangoObject $object);
 		
 		/**
 		 * Returns the class name of the current object

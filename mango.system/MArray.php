@@ -228,6 +228,19 @@
 		}
 		
 		/**
+		 *
+		 *
+		 * @return MArray
+		 */
+		public function sortedArrayUsingMethod(callback $method, $order = MArray::ORDER_ASCENDING) {
+			MAssertTypes('int', $order);
+			
+			$sortedArray = new MMutableArray();
+			
+			// TODO finish implementation
+		}
+		
+		/**
 		 * 
 		 *
 		 * @return MArray
@@ -255,6 +268,13 @@
 		}
 		
 		/******************** MObject Methods ********************/
+		
+		/**
+		 * 
+		 */
+		public function compare(MMangoObject $object) {
+			return N($this->count())->compare(N($object->count()));
+		}
 		
 		/**
 		 * 

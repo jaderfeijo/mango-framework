@@ -367,6 +367,13 @@
 		}
 		
 		/**
+		 *
+		 */
+		public function compare(MMangoObject $object) {
+			return strcmp($this->stringValue(), $object->stringValue());
+		}
+		
+		/**
 		 * 
 		 */
 		public function toString() {
@@ -377,7 +384,7 @@
 		 * 
 		 */
 		public function hash() {
-			return hexdec(md5($this->string));
+			return hexdec(md5($this->stringValue()));
 		}
 		
 	}

@@ -290,6 +290,28 @@
 		/******************** MObject ********************/
 		
 		/**
+		 *
+		 */
+		public function equals(MMangoObject $object) {
+			return ($this->number == $object->number);
+		}
+		
+		/**
+		 *
+		 */
+		public function compare(MMangoObject $object) {
+			if ($this->isGreaterThan($object)) {
+				return ORDERED_DESCENDING;
+			} else if ($this->equals($object)) {
+				return ORDERED_SAME;
+			} else if ($this->isLessThan($object)) {
+				return ORDERED_ASCENDING;
+			} else {
+				return ORDERED_SAME;
+			}
+		}
+		
+		/**
 		 * 
 		 */
 		public function toString() {

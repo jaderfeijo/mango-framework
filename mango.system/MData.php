@@ -154,6 +154,13 @@
 		/******************** MObject Methods ********************/
 		
 		/**
+		 *
+		 */
+		public function compare(MMangoObject $object) {
+			return N($this->length())->compare(N($object->length()));
+		}
+		
+		/**
 		 * 
 		 */
 		public function toString() {
