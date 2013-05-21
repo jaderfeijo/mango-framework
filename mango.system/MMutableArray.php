@@ -71,6 +71,23 @@
 		}
 		
 		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function addObjects($objects) {
+			if ($objects instanceof MArray) {
+				foreach ($objects->toArray() as $object) {
+					$this->addObject($object);
+				}
+			} else {
+				foreach ($objects as $object) {
+					$this->addObject($object);
+				}
+			}
+		}
+		
+		/**
 		 * 
 		 *
 		 * @return bool
