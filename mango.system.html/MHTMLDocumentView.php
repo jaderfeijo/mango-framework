@@ -71,33 +71,33 @@
 			$this->addSubview($this->bodyElement);
 		}
 		
-		/******************** Protected ********************/
+		/******************** Private ********************/
 		
 		/**
 		 * @return MArray
 		 */
-		protected function _subviews() {
+		private function _subviews() {
 			return parent::subviews();
 		}
 		
 		/**
 		 * @return void
 		 */
-		protected function _addSubview(MView $view) {
+		private function _addSubview(MView $view) {
 			parent::addSubview($view);
 		}
 		
 		/**
 		 * @return void
 		 */
-		protected function _removeSubview(MView $view) {
+		private function _removeSubview(MView $view) {
 			parent::removeSubview($view);
 		}
 		
 		/**
 		 * @return void
 		 */
-		protected function _removeAllSubviews() {
+		private function _removeAllSubviews() {
 			parent::removeAllSubviews();
 		}
 		
