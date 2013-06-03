@@ -168,6 +168,22 @@
 			}
 		}
 		
+		/******************** Methods ********************/
+		
+		/**
+		 * @return MMarkupElementView
+		 */
+		public function subviewWithPropertyAndValue(MString $property, MString $value) {
+			foreach ($this->subviews()->toArray() as $subview) {
+				if ($subview instanceof MMarkupElementView) {
+					if ($subview->valueForProperty($property)->equals($value)) {
+						return $subview;
+					}
+				}
+			}
+			return null;
+		}
+		
 		/******************** MObject Methods ********************/
 		
 		/**
