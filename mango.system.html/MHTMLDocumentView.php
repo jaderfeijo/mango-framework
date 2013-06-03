@@ -48,6 +48,7 @@
 		// ************************************************************
 		//
 		
+		protected $headElements;
 		protected $title;
 		
 		/**
@@ -58,10 +59,38 @@
 		public function __construct() {
 			parent::__construct();
 			
+			$this->headElements = new MMutableArray();
 			$this->title = new MString();
 		}
 		
 		/******************** Properties ********************/
+		
+		/**
+		 *
+		 *
+		 * @return MArray
+		 */
+		public function headElements() {
+			return $this->headElements;
+		}
+		
+		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function addHeadElement(MHTMLElementView $element) {
+			$this->headElements->addObject($element);
+		}
+		
+		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function removeHeadElement(MHTMLElementView $element) {
+			$this->headElements->removeObject($element);
+		}
 		
 		/**
 		 * 
@@ -90,9 +119,14 @@
 			$doc = new MMutableString();
 			
 			$doc->appendLine(S("<html>"));
+			
 			$doc->appendLine(S("<head>"));
+			foreach ($this->headElements->toArray() as $element) {
+				$doc->appendLine($element->toString());
+			}
 			$doc->appendLine(MString::stringWithFormat("<title>%s</title>", $this->title()));
 			$doc->appendLine(S("</head>"));
+			
 			$doc->appendLine(S("<body>"));
 			
 			// Layout all the subviews inside this document
