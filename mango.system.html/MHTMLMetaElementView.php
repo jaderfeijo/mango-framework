@@ -65,7 +65,7 @@
 		 * @return void
 		 */
 		public function setName(MString $name = null) {
-			$this->setProperty(S("name"), $name);
+			$this->setValueForProperty(S("name"), $name);
 		}
 		
 		/**
@@ -83,7 +83,7 @@
 		 * @return void
 		 */
 		public function setContent(MString $content = null) {
-			$this->setProperty(S("content"), $content);
+			$this->setValueForProperty(S("content"), $content);
 		}
 		
 		/**
@@ -101,7 +101,7 @@
 		 * @return void
 		 */
 		public function setCharset(MString $charset = null) {
-			$this->setProperty(S("charset"), $charset);
+			$this->setValueForProperty(S("charset"), $charset);
 		}
 		
 		/**
@@ -119,7 +119,7 @@
 		 * @return void
 		 */
 		public function setHttpEquiv(MString $httpEquiv = null) {
-			$this->setProperty(S("http-equiv"));
+			$this->setValueForProperty(S("http-equiv"));
 		}
 		
 		/**
@@ -137,7 +137,7 @@
 		 * @return void
 		 */
 		public function setScheme(MString $scheme = null) {
-			$this->setProperty(S("scheme"), $scheme);
+			$this->setValueForProperty(S("scheme"), $scheme);
 		}
 		
 	}

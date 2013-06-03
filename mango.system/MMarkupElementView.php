@@ -110,7 +110,7 @@
 		 *
 		 * @return void
 		 */
-		public function setProperty(MString $name, MString $value = null) {
+		public function setValueForProperty(MString $name, MString $value = null) {
 			if ($value) {
 				$this->properties->setObjectForKey($name, $value);
 			} else {

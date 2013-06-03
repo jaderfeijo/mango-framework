@@ -76,7 +76,7 @@
 		 * @return void
 		 */
 		public function setHref(MString $href = null) {
-			$this->setProperty(S("href"), $href);
+			$this->setValueForProperty(S("href"), $href);
 		}
 		
 	}
