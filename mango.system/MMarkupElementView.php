@@ -171,17 +171,19 @@
 		/******************** Methods ********************/
 		
 		/**
-		 * @return MMarkupElementView
+		 * @return MArray
 		 */
 		public function subviewWithPropertyAndValue(MString $property, MString $value) {
+			$views = new MMutableArray();
+			
 			foreach ($this->subviews()->toArray() as $subview) {
 				if ($subview instanceof MMarkupElementView) {
 					if ($subview->valueForProperty($property)->equals($value)) {
-						return $subview;
+						$views->addObject($subview);
 					}
 				}
 			}
-			return null;
+			return $views;
 		}
 		
 		/******************** MObject Methods ********************/
