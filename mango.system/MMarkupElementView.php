@@ -173,7 +173,7 @@
 		/**
 		 * @return MArray
 		 */
-		public function subviewWithPropertyAndValue(MString $property, MString $value) {
+		public function subviewsWithPropertyAndValue(MString $property, MString $value) {
 			$views = new MMutableArray();
 			
 			foreach ($this->subviews()->toArray() as $subview) {
