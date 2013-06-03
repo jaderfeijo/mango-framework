@@ -48,10 +48,9 @@
 		// ************************************************************
 		//
 		
+		protected $headElement;
 		protected $bodyElement;
 		protected $titleElement;
-		
-		protected $headElement;
 		
 		/**
 		 * 
@@ -61,14 +60,14 @@
 		public function __construct(MString $title = null) {
 			parent::__construct(S("html"));
 			
-			$this->bodyElement = new MHTMLElementView(S("body"));
-			$this->titleElement = new MHTMLElementView(S("title"), $title);
-			
 			$this->headElement = new MHTMLElementView(S("head"));
-			$this->headElement->addSubview($this->titleElement);
-			
 			$this->addSubview($this->headElement);
+			
+			$this->bodyElement = new MHTMLElementView(S("body"));
 			$this->addSubview($this->bodyElement);
+			
+			$this->titleElement = new MHTMLElementView(S("title"), $title);
+			$this->headElement->addSubview($this->titleElement);
 		}
 		
 		/******************** Private ********************/
@@ -102,22 +101,6 @@
 		}
 		
 		/******************** Properties ********************/
-		
-		/**
-		 * @return MHTMLElementView
-		 */
-		public function headElement() {
-			return $this->headElement;
-		}
-		
-		/**
-		 *
-		 *
-		 * @return MArray
-		 */
-		public function headElements() {
-			return $this->headElement->subviews();
-		}
 		
 		/**
 		 *
