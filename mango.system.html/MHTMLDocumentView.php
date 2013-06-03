@@ -121,6 +121,15 @@
 		}
 		
 		/**
+		 *
+		 *
+		 * @return MArray
+		 */
+		public function headElements() {
+			return $this->headElement->subviews();
+		}
+		
+		/**
 		 * 
 		 *
 		 * @return void
