@@ -73,6 +73,24 @@
 		 *
 		 * @return MString
 		 */
+		public function property() {
+			return $this->valueForProperty(S("property"));
+		}
+		
+		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function setProperty(MString $property = null) {
+			$this->setValueForProperty(S("property"), $property);
+		}
+		
+		/**
+		 *
+		 *
+		 * @return MString
+		 */
 		public function content() {
 			return $this->valueForProperty(S("content"));
 		}
