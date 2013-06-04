@@ -61,10 +61,10 @@
 			parent::__construct(S("html"));
 			
 			$this->headElement = new MHTMLElementView(S("head"));
-			$this->addSubview($this->headElement);
+			$this->_addSubview($this->headElement);
 			
 			$this->bodyElement = new MHTMLElementView(S("body"));
-			$this->addSubview($this->bodyElement);
+			$this->_addSubview($this->bodyElement);
 			
 			$this->titleElement = new MHTMLElementView(S("title"), $title);
 			$this->headElement->addSubview($this->titleElement);
