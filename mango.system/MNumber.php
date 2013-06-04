@@ -119,6 +119,8 @@
 				} else {
 					return new MNumber(0);
 				}
+			} else {
+				return false;
 			}
 		}
 		

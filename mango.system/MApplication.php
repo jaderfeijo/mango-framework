@@ -143,7 +143,7 @@
 					foreach ($attributeElement as $parameterElement) {
 						$required = N(true);
 						if (!is_null($parameterElement['required'])) {
-							$required = MNumber::parseBool($parameterElement['required'])->boolValue();
+							$required = MNumber::parseBool((string)$parameterElement['required'])->boolValue();
 						}
 
 						if ($parameterElement['type'] == "String") {
