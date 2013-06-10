@@ -111,7 +111,9 @@
 				$bool = (string)$bool;
 			}
 			
-			if (is_numeric($bool)) {
+			if (is_bool($bool)) {
+				return new MNumber((int)$bool);
+			} else if (is_numeric($bool)) {
 				return new MNumber((int)$bool);
 			} else if (is_string($bool)) {
 				if (strtolower($bool) == "on" || strtolower($bool) == "true" || strtolower($bool) == "yes") {

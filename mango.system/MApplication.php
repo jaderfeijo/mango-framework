@@ -144,9 +144,7 @@
 			foreach ($controllerElement as $attributeElement) {
 				if ($attributeElement->getName() == "parameters") {
 					foreach ($attributeElement as $parameterElement) {
-						MLog("Parameter element '%s'", $parameterElement['name']);
-						
-						$required = N(true);
+						$required = true;
 						if (isset($parameterElement['required'])) {
 							$required = MNumber::parseBool((string)$parameterElement['required'])->boolValue();
 						}
@@ -180,7 +178,7 @@
 							}
 						} else if ($acceptElement->getName() == "fields") {
 							foreach ($acceptElement as $fieldElement) {
-								$required = N(true);
+								$required = true;
 								if (isset($fieldElement['required'])) {
 									$required = MNumber::parseBool((string)$fieldElement['required'])->boolValue();
 								}
