@@ -63,7 +63,7 @@
 				} else if (is_int($num)) {
 					return MNumber::parseInt($num);
 				} else if (is_string($num)) {
-					
+					return MNumber::parseInt(intval($num));
 				}
 			} else if (is_bool($num)) {
 				return MNumber::parseBool($num);
