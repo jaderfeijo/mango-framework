@@ -78,14 +78,15 @@
 	 * handles the error with it's default error handler
 	 */
 	function mango_error_handler($level, $message, $file, $line, $context) {
-		logError($level, $message, $file, $line);
-		
 		if ($level == E_ERROR || $level == E_PARSE || $level == E_CORE_ERROR || $level == E_COMPILE_ERROR || $level == E_USER_ERROR) {
-			$response = new MHTTPViewControllerResponse(new MErrorViewController(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR, N(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR), S("Internal Server Error"), S("Sorry but the page you are looking for could not be loaded due to an internal server error")));
-			$response->setCode(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR);
-			MDie($response);
+			if (!MAppDelegate()->didRecoverFromError($level, $message, $file, $line, $context)) {
+				logError($level, $message, $file, $line);
+				
+				$response = new MHTTPViewControllerResponse(new MErrorViewController(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR, N(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR), S("Internal Server Error"), S("Sorry but the page you are looking for could not be loaded due to an internal server error")));
+				$response->setCode(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR);
+				MDie($response);
+			}
 		}
-		
 		return true;
 	}
 	
@@ -102,11 +103,13 @@
 	 * @return void
 	 */
 	function mango_exception_handler($exception) {
-		logException($exception);
-		
-		$response = new MHTTPViewControllerResponse(new MErrorViewController(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR, N(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR), S("Internal Server Error"), S("Sorry but the page you are looking for could not be loaded due to an internal server error")));
-		$response->setCode(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR);
-		MDie($response);
+		if (!MAppDelegate()->didRecoverFromException($exception)) {
+			logException($exception);
+			
+			$response = new MHTTPViewControllerResponse(new MErrorViewController(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR, N(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR), S("Internal Server Error"), S("Sorry but the page you are looking for could not be loaded due to an internal server error")));
+			$response->setCode(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR);
+			MDie($response);
+		}
 	}
 	
 	/**

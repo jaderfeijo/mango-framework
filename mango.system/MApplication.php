@@ -98,10 +98,12 @@
 			
 			if ($delegateClass) {
 				$this->delegate = MObject::newInstanceOfClass($delegateClass);
-			} else {
+			} else if (MFile::fileExists("resources/manifest.xml")) {
 				$xmlManifest = simplexml_load_file("resources/manifest.xml");
 				$this->delegate = MObject::newInstanceOfClass(S($xmlManifest['delegate']));
 				$this->defaultNamespace = $this->parseNamespaceElement($xmlManifest);
+			} else {
+				$this->delegate = new MApplicationDelegate();
 			}
 		}
 		
