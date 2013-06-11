@@ -31,6 +31,8 @@
 	package('mango.data');
 	
 	import('mango.system.*');
+	import('mango.system.io.*');
+	import('mango.system.exceptions.*');
 	
 	/**
 	 *
@@ -140,6 +142,8 @@
 		 * @return MArray An Array containing the parsed objects
 		 */
 		public function parseObjectsFromFile(MFile $file) {
+			if (!$file->exists()) throw new MFileNotFoundException($file->path());
+			
 			$xml = simplexml_load_file($file->path()->stringValue());
 			return $this->parseObjectsFromXML($xml);
 		}
