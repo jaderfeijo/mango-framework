@@ -27,136 +27,135 @@
 	 * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 	 * SUCH DAMAGE.
 	 */
-	 
+	
 	package('mango.system.html');
 	
 	import('mango.system.*');
 	
 	/**
-	 * 
 	 *
 	 * @author Jader Feijo <jader@movinpixel.com>
-	 *
-	 * @license MIT
 	 *
 	 * @package mango.system.html
 	 *
 	 */
-	class MHTMLDocumentView extends MHTMLElementView {
+	class MHTMLMetaElementView extends MHTMLElementView {
 		
-		//
-		// ************************************************************
-		//
-		
-		protected $headElementView;
-		protected $bodyElementView;
-		protected $titleElementView;
-		
-		/**
-		 * 
-		 *
-		 * @return MHTMLDocumentView
-		 */
-		public function __construct(MString $title = null) {
-			parent::__construct(S("html"));
+		public function __construct(MString $name = null, MString $content = null) {
+			parent::__construct(S("meta"));
 			
-			$this->headElementView = new MHTMLElementView(S("head"));
-			$this->addSubview($this->headElementView);
-			
-			$this->bodyElementView = new MHTMLElementView(S("body"));
-			$this->addSubview($this->bodyElementView);
-			
-			$this->titleElementView = new MHTMLElementView(S("title"), $title);
-			$this->headElementView->addSubview($this->titleElementView);
+			$this->setName($name);
+			$this->setContent($content);
 		}
 		
 		/******************** Properties ********************/
 		
 		/**
-		 * @return MHTMLElementView
-		 */
-		public function headElementView() {
-			return $this->headElementView;
-		}
-	
-		/**
-		 * @return MHTMLElementView
-		 */
-		public function bodyElementView() {
-			return $this->bodyElementView;
-		}
-	
-		/**
-		 * @return MHTMLElementView
-		 */
-		public function titleElementView() {
-			return $this->titleElementView;
-		}
-		
-		/**
 		 *
-		 *
-		 * @return void
-		 */
-		public function addHeadElement(MHTMLElementView $element) {
-			$this->headElementView()->addSubview($element);
-		}
-		
-		/**
-		 *
-		 *
-		 * @return void
-		 */
-		public function removeHeadElement(MHTMLElementView $element) {
-			$this->headElementView()->removeSubview($element);
-		}
-		
-		/**
-		 *
-		 *
-		 * @return MArray
-		 */
-		public function headElements() {
-			return $this->headElementView()->subviews();
-		}
-		
-		/**
-		 * @return void
-		 */
-		public function addBodyElement(MHTMLView $view) {
-			$this->bodyElementView()->addSubview($view);
-		}
-	
-		/**
-		 * @return void
-		 */
-		public function removeBodyElement(MHTMLView $view) {
-			$this->bodyElementView()->removeSubview($view);
-		}
-	
-		/**
-		 * @return MArray
-		 */
-		public function bodyElements() {
-			return $this->bodyElementView()->subviews();
-		}
-		
-		/**
-		 * 
-		 *
-		 * @return void
-		 */
-		public function setTitle(MString $title) {
-			$this->titleElementView()->setText($title);
-		}
-		
-		/**
-		 * 
 		 *
 		 * @return MString
 		 */
-		public function title() {
-			return $this->titleElementView()->text();
+		public function name() {
+			return $this->valueForProperty(S("name"));
+		}
+		
+		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function setName(MString $name = null) {
+			$this->setValueForProperty(S("name"), $name);
+		}
+		
+		/**
+		 *
+		 *
+		 * @return MString
+		 */
+		public function property() {
+			return $this->valueForProperty(S("property"));
+		}
+		
+		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function setProperty(MString $property = null) {
+			$this->setValueForProperty(S("property"), $property);
+		}
+		
+		/**
+		 *
+		 *
+		 * @return MString
+		 */
+		public function content() {
+			return $this->valueForProperty(S("content"));
+		}
+		
+		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function setContent(MString $content = null) {
+			$this->setValueForProperty(S("content"), $content);
+		}
+		
+		/**
+		 *
+		 *
+		 * @return MString
+		 */
+		public function charset() {
+			return $this->valueForProperty(S("charset"));
+		}
+		
+		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function setCharset(MString $charset = null) {
+			$this->setValueForProperty(S("charset"), $charset);
+		}
+		
+		/**
+		 *
+		 *
+		 * @return MString
+		 */
+		public function httpEquiv() {
+			return $this->valueForProperty(S("http-equiv"));
+		}
+		
+		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function setHttpEquiv(MString $httpEquiv = null) {
+			$this->setValueForProperty(S("http-equiv"));
+		}
+		
+		/**
+		 *
+		 *
+		 * @return MString
+		 */
+		public function scheme() {
+			return $this->valueForProperty(S("scheme"));
+		}
+		
+		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function setScheme(MString $scheme = null) {
+			$this->setValueForProperty(S("scheme"), $scheme);
 		}
 		
 	}

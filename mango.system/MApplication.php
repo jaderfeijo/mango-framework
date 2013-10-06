@@ -61,6 +61,9 @@
 		 * @return MApplication The currently running Application instance
 		 */
 		public static function sharedApplication() {
+			if (!MApplication::$application) {
+				MApplication::$application = new MApplication();
+			}
 			return MApplication::$application;
 		}
 		
@@ -97,10 +100,12 @@
 			
 			if ($delegateClass) {
 				$this->delegate = MObject::newInstanceOfClass($delegateClass);
-			} else {
+			} else if (MFile::fileExists("resources/manifest.xml")) {
 				$xmlManifest = simplexml_load_file("resources/manifest.xml");
 				$this->delegate = MObject::newInstanceOfClass(S($xmlManifest['delegate']));
 				$this->defaultNamespace = $this->parseNamespaceElement($xmlManifest);
+			} else {
+				$this->delegate = new MApplicationDelegate();
 			}
 		}
 		
@@ -143,9 +148,9 @@
 			foreach ($controllerElement as $attributeElement) {
 				if ($attributeElement->getName() == "parameters") {
 					foreach ($attributeElement as $parameterElement) {
-						$required = N(true);
-						if (!is_null($parameterElement['required'])) {
-							$required = MNumber::parseBool($parameterElement['required'])->boolValue();
+						$required = true;
+						if (isset($parameterElement['required'])) {
+							$required = MNumber::parseBool((string)$parameterElement['required'])->boolValue();
 						}
 
 						if ($parameterElement['type'] == "String") {
@@ -177,9 +182,9 @@
 							}
 						} else if ($acceptElement->getName() == "fields") {
 							foreach ($acceptElement as $fieldElement) {
-								$required = N(true);
-								if (!is_null($fieldElement['required'])) {
-									$required = MNumber::parseBool($fieldElement['required'])->boolValue();
+								$required = true;
+								if (isset($fieldElement['required'])) {
+									$required = MNumber::parseBool((string)$fieldElement['required'])->boolValue();
 								}
 								
 								if ($fieldElement['type'] == "String") {

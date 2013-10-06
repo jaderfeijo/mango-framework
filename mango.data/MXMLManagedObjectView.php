@@ -80,24 +80,24 @@
 			$this->dynamicFields = new MMutableDictionary();
 			$this->dynamicFieldViews = new MMutableDictionary();
 			
-			$this->setProperty(S("objectID"), S((string)$this->managedObject()->objectID()));
+			$this->setValueForProperty(S("objectID"), S((string)$this->managedObject()->objectID()));
 			if (!$managedObject->isFault()) {
 				foreach ($managedObject->entity()->attributes()->toArray() as $attribute) {
 					if ($attribute instanceof MEntityDescriptionProperty) {
 						$object = $managedObject->objectForAttribute($attribute);
 						$propertyElement = new MXMLElementView($attribute->name(), ($object ? $object->toString() : S("")));
-						$propertyElement->setProperty(S("type"), S($attribute->type()));
+						$propertyElement->setValueForProperty(S("type"), S($attribute->type()));
 						$this->addSubview($propertyElement);
 					} else if ($attribute instanceof MEntityDescriptionRelationship) {
 						$relationshipElement = new MXMLElementView($attribute->name());
-						$relationshipElement->setProperty(S("type"), $attribute->type());
+						$relationshipElement->setValueForProperty(S("type"), $attribute->type());
 						$relationshipValues = $managedObject->objectForAttribute($attribute);
 						if (!$relationshipValues instanceof MArray) {
 							$relationshipValues = A(array($relationshipValues));
 						}
 						foreach ($relationshipValues->toArray() as $object) {
 							$objectElement = new MXMLElementView($attribute->singular());
-							$objectElement->setProperty(S("objectID"), Sf("%d", $object->objectID()));
+							$objectElement->setValueForProperty(S("objectID"), Sf("%d", $object->objectID()));
 							$relationshipElement->addSubview($objectElement);
 						}
 					} else {
@@ -121,7 +121,7 @@
 			$dataType = $dataProvider->dataTypeForFieldWithName($this->managedObject(), $fieldName);
 			$data = $dataProvider->dataForFieldWithName($this->managedObject(), $fieldName);
 			$fieldElement = new MXMLElementView($fieldName, ($data ? $data->toString() : S("")));
-			$fieldElement->setProperty(S("type"), $dataType);
+			$fieldElement->setValueForProperty(S("type"), $dataType);
 			$this->addSubview($fieldElement);
 			$this->dynamicFieldViews->setObjectForKey($fieldName, $fieldElement);
 		}

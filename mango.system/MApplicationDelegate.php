@@ -30,12 +30,10 @@
 	
 	package('mango.system');
 	
-	import('mango.system.html.*');
-	
 	/**
-	 * Interface that defines the basic structure of an Application Delegate
+	 * Class that defines the basic structure of an Application Delegate
 	 *
-	 * All Application Delegates should conform to this interface
+	 * All Application Delegates should derrive from this class
 	 *
 	 * @author Jader Feijo <jader@movinpixel.com>
 	 *
@@ -44,9 +42,9 @@
 	 * @package mango.system
 	 *
 	 */
-	interface MApplicationDelegate {
+	class MApplicationDelegate {
 		
-		/******************** Delegate Methods ********************/
+		/******************** Class Methods ********************/
 		
 		/**
 		 * Called once the application has just finished loading,
@@ -58,7 +56,9 @@
 		 *
 		 * @return void
 		 */
-		public function applicationDidLoad();
+		public function applicationDidLoad() {
+			
+		}
 		
 		/**
 		 * Called right after the view controller instance for the current
@@ -72,7 +72,56 @@
 		 *
 		 * @return void
 		 */
-		public function didCreateViewController(MViewController $viewController);
+		public function didCreateViewController(MViewController $viewController) {
+			
+		}
+		
+		/**
+		 * Called when an exception occurs which hasn't been caught by any parts
+		 * of your application
+		 *
+		 * This method offers you the opportunity to handle the exception and
+		 * recover from it if possible
+		 *
+		 * The return value represents whether you have handled the exception
+		 * or not. If you return false the system will log the exception to
+		 * the PHP error console and will return a '500 Internal Server Error'
+		 * to the client
+		 *
+		 * @param Exception $exception The uncaught exception to be handled
+		 *
+		 * @return bool Returns true if the exception has been handled, false otherwise
+		 */
+		public function didRecoverFromUncaughtException(Exception $exception) {
+			return false;
+		}
+		
+		/**
+		 * Called when an error occurs which hasn't been handled by any parts
+		 * of your application
+		 *
+		 * This method offers you the opportunity to handle the error and
+		 * recover from it if possible
+		 *
+		 * The return value represents whether you have handled the error
+		 * or not. If you return false the system will log the error to
+		 * the PHP error console and will return a '500 Internal Server Error'
+		 * to the client
+		 *
+		 * @param int $level The PHP error level
+		 * @param string $message The PHP error message
+		 * @param string $file The PHP file where the error occured
+		 * @param int $line The line number where the error occured
+		 * @param array $context An array that points to the active symbol
+		 * table at the point the error occured
+		 *
+		 * @see http://www.php.net/manual/en/function.set-error-handler.php
+		 *
+		 * @return bool Returns true if the error has been handled, false otherwise
+		 */
+		public function didRecoverFromError($level, $message, $file, $line, $context) {
+			return false;
+		}
 		
 	}
 

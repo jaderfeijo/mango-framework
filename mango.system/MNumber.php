@@ -63,7 +63,7 @@
 				} else if (is_int($num)) {
 					return MNumber::parseInt($num);
 				} else if (is_string($num)) {
-					
+					return MNumber::parseInt(intval($num));
 				}
 			} else if (is_bool($num)) {
 				return MNumber::parseBool($num);
@@ -111,7 +111,9 @@
 				$bool = (string)$bool;
 			}
 			
-			if (is_numeric($bool)) {
+			if (is_bool($bool)) {
+				return new MNumber((int)$bool);
+			} else if (is_numeric($bool)) {
 				return new MNumber((int)$bool);
 			} else if (is_string($bool)) {
 				if (strtolower($bool) == "on" || strtolower($bool) == "true" || strtolower($bool) == "yes") {
@@ -119,6 +121,8 @@
 				} else {
 					return new MNumber(0);
 				}
+			} else {
+				return false;
 			}
 		}
 		
