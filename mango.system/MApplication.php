@@ -39,9 +39,10 @@
 	 * Application. It controls the execution and allows you to configure
 	 * several different aspects of your Mango Application
 	 *
-	 * You should never create an instance of this class directly. To access
-	 * the MApplication singleton instance that represents the currently
-	 * running Application use MApplication::sharedApplication()
+	 * You should only ever create one instance of this class, this is usually done
+	 * in the index.php file. To access the MApplication singleton instance that
+	 * represents the currently running Application use
+	 * MApplication::sharedApplication()
 	 *
 	 * @author Jader Feijo <jader@movinpixel.com>
 	 *
@@ -76,11 +77,14 @@
 		protected $rootViewController;
 		
 		/**
-		 * Initializes a new instance of MApplication with the specified
-		 * delegate class. If no delegate class is specified the system looks
-		 * for the manifest.xml file inside the resources folder and parses it
+		 * Creates a new MApplication instance with the specified delegate class
+		 * If no delegate class is specified the system looks for the 'manifest.xml'
+		 * file inside the 'resources' folder and parses it
 		 *
-		 * @return MApplication
+		 * @param MString $delegateClass A string containing the fully qualified class
+		 * name for this application's delegate, or null.
+		 *
+		 * @return MApplication The MApplication instance which has just been created
 		 */
 		public function __construct(MString $delegateClass = null) {
 			parent::__construct();
@@ -114,6 +118,8 @@
 		/**
 		 * @internal
 		 *
+		 * @param $namespaceElement
+		 *
 		 * @return MApplicationNamespace
 		 */
 		public function parseNamespaceElement($namespaceElement) {
@@ -139,6 +145,8 @@
 		
 		/**
 		 * @internal
+		 *
+		 * @param $controllerElement
 		 *
 		 * @return MApplicationController
 		 */
@@ -299,8 +307,8 @@
 		/******************** Methods ********************/
 		
 		/**
-		 * This function needs to be called by your top-level script. This is the
-		 * entry point for your application's execution
+		 * This function needs to be called after creating your instance of MApplication.
+		 * This is the entry point for your application's execution
 		 *
 		 * When you call this function, the Mango environment parses all the information
 		 * it needs, sets itself up and boots up its classes
@@ -308,12 +316,12 @@
 		 * This is also where routing occours. The system finds the controller class for
 		 * the specified URL and loads it
 		 *
-		 * The system takes care of handling top-level errors that may occour. For example,
+		 * The system takes care of handling top-level errors that may occur. For example,
 		 * if the URL requested by the user has no registered controllers, the system returns
 		 * a 404 View to the user and responds with the appropriate HTTP code.
 		 *
 		 * The same thing happens if an exception is thrown and not caught or if another error
-		 * occours in the execution of your code. The system catches the error, outputs the
+		 * occurs in the execution of your code. The system catches the error, outputs the
 		 * appropriate error information to the error log and returns an 500 Internal Server
 		 * Error view to the client
 		 *
