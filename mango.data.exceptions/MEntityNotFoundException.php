@@ -44,7 +44,13 @@
 	class MEntityNotFoundException extends MException {
 		
 		/** 
+		 * Initializes a new instance of MEntityNotFoundException
 		 *
+		 * This exception is thrown when the specified entity is not found
+		 *
+		 * @param MString $entityName The name of the entity that could not be found
+		 * @param MException $previous A previous exception which caused this exception
+		 * to be raised
 		 */
 		public function __construct(MString $entityName, MException $previous = null) {
 			parent::__construct(Sf("The entity named '%s' could not be found", $entityName), MException::ENTITY_NOT_FOUND_EXCEPTION_CODE, $previous);

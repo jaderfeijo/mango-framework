@@ -73,7 +73,9 @@
 		protected $rootViewController;
 		
 		/**
-		 * @internal
+		 * Initializes a new instance of MApplication with the specified
+		 * delegate class. If no delegate class is specified the system looks
+		 * for the manifest.xml file inside the resources folder and parses it
 		 *
 		 * @return MApplication
 		 */
@@ -249,8 +251,6 @@
 		
 		
 		/**
-		 * @internal
-		 *
 		 * Returns the root view controller for this current instance of the application.
 		 * The root view controller is returned depending on which parameters are called.
 		 * The Application class parses the request URL and breaks down the different elements
@@ -270,8 +270,9 @@
 		/******************** Properties ********************/
 		
 		/**
+		 * Returns the default namespace for this application.
 		 *
-		 * @return MApplicationNamespace
+		 * @return MApplicationNamespace The default namespace used by this application
 		 */
 		public function defaultNamespace() {
 			if (!$this->defaultNamespace) {
