@@ -142,9 +142,7 @@
 			$this->savingRemovedRelationships = new MMutableArray();
 			
 			$this->initDefaultValues();
-			
 			$this->context()->insertObject($this);
-			
 			$this->didCreateObject();
 		}
 		
