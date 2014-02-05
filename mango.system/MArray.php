@@ -228,6 +228,27 @@
 		}
 		
 		/**
+		 *
+		 *
+		 * @return MArray
+		 */
+		public function sortedArrayUsingMethod(callback $method, $order = MArray::ORDER_ASCENDING) {
+			$array = $this->toArray();
+			usort($array, function ($a, $b) {
+				$result = $a->{$method}($b);
+				if (MArray::ORDER_DESCENDING) {
+					if ($result == MMangoObject::ORDERED_ASCENDING) {
+						$result = MMangoObject::ORDERED_DESCENDING;
+					} else if ($result == MMangoObject::ORDERED_DESCENDING) {
+						$result = MMangoObject::ORDERED_ASCENDING;
+					}
+				}
+				return $result;
+			});
+			return new MArray($array);
+		}
+		
+		/**
 		 * 
 		 *
 		 * @return MArray
@@ -255,6 +276,13 @@
 		}
 		
 		/******************** MObject Methods ********************/
+		
+		/**
+		 * 
+		 */
+		public function compare(MMangoObject $object) {
+			return N($this->count())->compare(N($object->count()));
+		}
 		
 		/**
 		 * 

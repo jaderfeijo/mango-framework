@@ -39,9 +39,10 @@
 	 * Application. It controls the execution and allows you to configure
 	 * several different aspects of your Mango Application
 	 *
-	 * You should never create an instance of this class directly. To access
-	 * the MApplication singleton instance that represents the currently
-	 * running Application use MApplication::sharedApplication()
+	 * You should only ever create one instance of this class, this is usually done
+	 * in the index.php file. To access the MApplication singleton instance that
+	 * represents the currently running Application use
+	 * MApplication::sharedApplication()
 	 *
 	 * @author Jader Feijo <jader@movinpixel.com>
 	 *
@@ -61,6 +62,9 @@
 		 * @return MApplication The currently running Application instance
 		 */
 		public static function sharedApplication() {
+			if (!MApplication::$application) {
+				MApplication::$application = new MApplication();
+			}
 			return MApplication::$application;
 		}
 		
@@ -73,9 +77,14 @@
 		protected $rootViewController;
 		
 		/**
-		 * @internal
+		 * Creates a new MApplication instance with the specified delegate class
+		 * If no delegate class is specified the system looks for the 'manifest.xml'
+		 * file inside the 'resources' folder and parses it
 		 *
-		 * @return MApplication
+		 * @param MString $delegateClass A string containing the fully qualified class
+		 * name for this application's delegate, or null.
+		 *
+		 * @return MApplication The MApplication instance which has just been created
 		 */
 		public function __construct(MString $delegateClass = null) {
 			parent::__construct();
@@ -95,10 +104,12 @@
 			
 			if ($delegateClass) {
 				$this->delegate = MObject::newInstanceOfClass($delegateClass);
-			} else {
+			} else if (MFile::fileExists("resources/manifest.xml")) {
 				$xmlManifest = simplexml_load_file("resources/manifest.xml");
 				$this->delegate = MObject::newInstanceOfClass(S($xmlManifest['delegate']));
 				$this->defaultNamespace = $this->parseNamespaceElement($xmlManifest);
+			} else {
+				$this->delegate = new MApplicationDelegate();
 			}
 		}
 		
@@ -107,6 +118,8 @@
 		/**
 		 * @internal
 		 *
+		 * @param $namespaceElement
+		 *
 		 * @return MApplicationNamespace
 		 */
 		public function parseNamespaceElement($namespaceElement) {
@@ -114,11 +127,11 @@
 			$namespace->setErrorViewControllerClass(S($namespaceElement['errorClass']));
 			
 			foreach ($namespaceElement as $element) {
-				if ($element->getName() == "viewcontroller") {
+				if ($element->getName() == "controller") {
 					if (is_null($element['name'])) {
-						$namespace->setMainViewController($this->parseApplicationController($element));
+						$namespace->setMainController($this->parseControllerElement($element));
 					} else {
-						$namespace->addViewController($this->parseApplicationController($element));
+						$namespace->addController($this->parseControllerElement($element));
 					}
 				} else if ($element->getName() == "namespace") {
 					$namespace->addChildNamespace($this->parseNamespaceElement($element));
@@ -133,51 +146,53 @@
 		/**
 		 * @internal
 		 *
+		 * @param $controllerElement
+		 *
 		 * @return MApplicationController
 		 */
-		public function parseApplicationController($controllerElement) {
+		public function parseControllerElement($controllerElement) {
 			$controller = new MApplicationController(S($controllerElement['class']), S($controllerElement['name']));
 			
 			foreach ($controllerElement as $attributeElement) {
-				if ($attributeElement->getName() == "accept") {
+				if ($attributeElement->getName() == "parameters") {
+					foreach ($attributeElement as $parameterElement) {
+						$required = true;
+						if (isset($parameterElement['required'])) {
+							$required = MNumber::parseBool((string)$parameterElement['required'])->boolValue();
+						}
+
+						if ($parameterElement['type'] == "String") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::StringType, $required));
+						} else if ($parameterElement['type'] == "Integer") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::IntegerType, $required));
+						} else if ($parameterElement['type'] == "Float") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::FloatType, $required));
+						} else if ($parameterElement['type'] == "Boolean") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::BooleanType, $required));
+						} else if ($parameterElement['type'] == "Date") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::DateType, $required));
+						} else if ($parameterElement['type'] == "Binary") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::Binary, $required));
+						} else if ($parameterElement['type'] == "Array") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::ArrayType, $required));
+						} else if ($parameterElement['type'] == "Dictionary") {
+							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::DictionaryType, $required));
+						} else {
+							throw new MParseErrorException(S("resources/manifest.xml"), null, Sf("Unknown type '%s'", $parameterElement['type']));
+						}
+					}
+				} else if ($attributeElement->getName() == "accept") {
 					$acceptedMethod = new MApplicationControllerAcceptedMethod(S($attributeElement['method']));
 					foreach ($attributeElement as $acceptElement) {
 						if ($acceptElement->getName() == "content-types") {
 							foreach ($acceptElement as $contentTypeElement) {
 								$acceptedMethod->addContentType(S($contentTypeElement));
 							}
-						} else if ($acceptElement->getName() == "parameters") {
-							foreach ($acceptElement as $parameterElement) {
-								$required = N(true);
-								if (!is_null($parameterElement['required'])) {
-									$required = MNumber::parseBool($parameterElement['required'])->boolValue();
-								}
-								
-								if ($parameterElement['type'] == "String") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::StringType, $required));
-								} else if ($parameterElement['type'] == "Integer") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::IntegerType, $required));
-								} else if ($parameterElement['type'] == "Float") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::FloatType, $required));
-								} else if ($parameterElement['type'] == "Boolean") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::BooleanType, $required));
-								} else if ($parameterElement['type'] == "Date") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::DateType, $required));
-								} else if ($parameterElement['type'] == "Binary") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::Binary, $required));
-								} else if ($parameterElement['type'] == "Array") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::ArrayType, $required));
-								} else if ($parameterElement['type'] == "Dictionary") {
-									$acceptedMethod->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::DictionaryType, $required));
-								} else {
-									throw new MParseErrorException(S("resources/manifest.xml"), null, Sf("Unknown type '%s'", $parameterElement['type']));
-								}
-							}
 						} else if ($acceptElement->getName() == "fields") {
 							foreach ($acceptElement as $fieldElement) {
-								$required = N(true);
-								if (!is_null($fieldElement['required'])) {
-									$required = MNumber::parseBool($fieldElement['required'])->boolValue();
+								$required = true;
+								if (isset($fieldElement['required'])) {
+									$required = MNumber::parseBool((string)$fieldElement['required'])->boolValue();
 								}
 								
 								if ($fieldElement['type'] == "String") {
@@ -249,8 +264,6 @@
 		
 		
 		/**
-		 * @internal
-		 *
 		 * Returns the root view controller for this current instance of the application.
 		 * The root view controller is returned depending on which parameters are called.
 		 * The Application class parses the request URL and breaks down the different elements
@@ -270,8 +283,9 @@
 		/******************** Properties ********************/
 		
 		/**
+		 * Returns the default namespace for this application.
 		 *
-		 * @return MApplicationNamespace
+		 * @return MApplicationNamespace The default namespace used by this application
 		 */
 		public function defaultNamespace() {
 			if (!$this->defaultNamespace) {
@@ -293,8 +307,8 @@
 		/******************** Methods ********************/
 		
 		/**
-		 * This function needs to be called by your top-level script. This is the
-		 * entry point for your application's execution
+		 * This function needs to be called after creating your instance of MApplication.
+		 * This is the entry point for your application's execution
 		 *
 		 * When you call this function, the Mango environment parses all the information
 		 * it needs, sets itself up and boots up its classes
@@ -302,12 +316,12 @@
 		 * This is also where routing occours. The system finds the controller class for
 		 * the specified URL and loads it
 		 *
-		 * The system takes care of handling top-level errors that may occour. For example,
+		 * The system takes care of handling top-level errors that may occur. For example,
 		 * if the URL requested by the user has no registered controllers, the system returns
 		 * a 404 View to the user and responds with the appropriate HTTP code.
 		 *
 		 * The same thing happens if an exception is thrown and not caught or if another error
-		 * occours in the execution of your code. The system catches the error, outputs the
+		 * occurs in the execution of your code. The system catches the error, outputs the
 		 * appropriate error information to the error log and returns an 500 Internal Server
 		 * Error view to the client
 		 *

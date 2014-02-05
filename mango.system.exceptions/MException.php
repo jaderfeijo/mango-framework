@@ -64,6 +64,7 @@
 		const FIELD_UNDEFINED_EXCEPTION = 17;
 		const PARAMETER_UNDEFINED_EXCEPTION = 18;
 		const INPUT_OUTPUT_EXCEPTION = 19;
+		const FILE_NOT_FOUND_EXCEPTION = 20;
 		
 		//
 		// ************************************************************
@@ -135,6 +136,13 @@
 		 */
 		public function equals(MMangoObject $object) {
 			return ($this == $object);
+		}
+		
+		/**
+		 *
+		 */
+		public function compare(MMangoObject $object) {
+			return N($this->code())->compare(N($object->code()));
 		}
 		
 		/**

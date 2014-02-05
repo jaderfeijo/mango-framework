@@ -28,46 +28,35 @@
 	 * SUCH DAMAGE.
 	 */
 	
-	package('mango.system');
+	package('mango.system.html');
+	
+	import('mango.system.*');
 	
 	/**
-	 * 
 	 *
 	 * @author Jader Feijo <jader@movinpixel.com>
 	 *
-	 * @license MIT
-	 *
-	 * @package mango.system
+	 * @package mango.system.html
 	 *
 	 */
-	class MMutableArray extends MArray {
+	class MHTMLMetaElementView extends MHTMLElementView {
 		
-		//
-		// ************************************************************
-		//
-		
-		/**
-		 * 
-		 *
-		 * @return MMutableArray
-		 */
-		public function __construct(MArray $array = null) {
-			if (!is_null($array)) {
-				parent::__construct($array->array);
-			} else {
-				parent::__construct();
-			}
+		public function __construct(MString $name = null, MString $content = null) {
+			parent::__construct(S("meta"));
+			
+			$this->setName($name);
+			$this->setContent($content);
 		}
 		
-		/******************** Methods ********************/
+		/******************** Properties ********************/
 		
 		/**
-		 * 
 		 *
-		 * @return void
+		 *
+		 * @return MString
 		 */
-		public function addObject($object) {
-			$this->array[] = $object;
+		public function name() {
+			return $this->valueForProperty(S("name"));
 		}
 		
 		/**
@@ -75,87 +64,98 @@
 		 *
 		 * @return void
 		 */
-		public function addObjects($objects) {
-			if ($objects instanceof MArray) {
-				foreach ($objects->toArray() as $object) {
-					$this->addObject($object);
-				}
-			} else {
-				foreach ($objects as $object) {
-					$this->addObject($object);
-				}
-			}
+		public function setName(MString $name = null) {
+			$this->setValueForProperty(S("name"), $name);
 		}
 		
 		/**
-		 * 
 		 *
-		 * @return bool
+		 *
+		 * @return MString
 		 */
-		public function removeObject($object) {
-			for ($i = 0; $i < $this->count(); $i++) {
-				if ($this->array[$i] == $object) {
-					$this->removeObjectAtIndex($i);
-					return true;
-				}
-			}
-			return false;
+		public function property() {
+			return $this->valueForProperty(S("property"));
 		}
 		
 		/**
-		 * 
+		 *
 		 *
 		 * @return void
 		 */
-		public function removeObjectAtIndex($index) {
-			MAssertTypes('int', $index);
-			if (N($index)->isWithinBounds($this->lowerBound(), $this->upperBound())) {
-				array_splice($this->array, $index, 1);
-			} else {
-				throw new MIndexOutOfBoundsException($index, $this->lowerBound(), $this->upperBound());
-			}
+		public function setProperty(MString $property = null) {
+			$this->setValueForProperty(S("property"), $property);
 		}
 		
 		/**
-		 * 
 		 *
-		 * @return void
+		 *
+		 * @return MString
 		 */
-		public function removeAllObjects() {
-			unset($this->array);
-			$this->array = array();
+		public function content() {
+			return $this->valueForProperty(S("content"));
 		}
 		
 		/**
-		 * 
+		 *
 		 *
 		 * @return void
 		 */
-		public function appendArray(MArray $array) {
-			$this->array = array_merge($this->array, $array->array);
+		public function setContent(MString $content = null) {
+			$this->setValueForProperty(S("content"), $content);
 		}
 		
 		/**
-		 * 
+		 *
+		 *
+		 * @return MString
+		 */
+		public function charset() {
+			return $this->valueForProperty(S("charset"));
+		}
+		
+		/**
+		 *
 		 *
 		 * @return void
 		 */
-		public function subtractArray(MArray $array) {
-			foreach ($array as $search) {
-				foreach ($this->array as $key => $value) {
-					if ($search instanceof MObject) {
-						if ($search->equals($value)) {
-							$this->removeObjectAtIndex($key);
-							break;
-						}
-					} else {
-						if ($search == $value) {
-							$this->removeObjectAtIndex($key);
-							break;
-						}
-					}
-				}
-			}
+		public function setCharset(MString $charset = null) {
+			$this->setValueForProperty(S("charset"), $charset);
+		}
+		
+		/**
+		 *
+		 *
+		 * @return MString
+		 */
+		public function httpEquiv() {
+			return $this->valueForProperty(S("http-equiv"));
+		}
+		
+		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function setHttpEquiv(MString $httpEquiv = null) {
+			$this->setValueForProperty(S("http-equiv"));
+		}
+		
+		/**
+		 *
+		 *
+		 * @return MString
+		 */
+		public function scheme() {
+			return $this->valueForProperty(S("scheme"));
+		}
+		
+		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function setScheme(MString $scheme = null) {
+			$this->setValueForProperty(S("scheme"), $scheme);
 		}
 		
 	}

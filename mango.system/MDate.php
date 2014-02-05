@@ -322,6 +322,13 @@
 		/******************** MObject ********************/
 		
 		/**
+		 *
+		 */
+		public function compare(MMangoObject $object) {
+			return N($this->timestamp())->compare(N($object->timestamp()));
+		}
+		
+		/**
 		 * 
 		 */
 		public function toString() {

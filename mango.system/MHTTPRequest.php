@@ -71,6 +71,7 @@
 		
 		protected $method;
 		protected $contentType;
+		protected $contents;
 		protected $inputParameters;
 		protected $inputFields;
 		protected $arguments;
@@ -89,6 +90,7 @@
 			
 			$this->method = null;
 			$this->contentType = null;
+			$this->contents = null;
 			$this->inputParameters = null;
 			$this->inputFields = null;
 			$this->arguments = null;
@@ -125,6 +127,16 @@
 		}
 		
 		/**
+		 * @return MData
+		 */
+		public function contents() {
+			if (!$this->contents) {
+				$this->contents = new MData(file_get_contents("php://input"));
+			}
+			return $this->contents;
+		}
+		
+		/**
 		 * @return MDictionary
 		 */
 		public function inputParameters() {
@@ -149,7 +161,7 @@
 				$data = $_POST;
 				if (!$data) {
 					$data = array();
-					parse_str(file_get_contents("php://input"), $data);
+					parse_str($this->contents()->getBytes(), $data);
 				}
 				foreach ($data as $key => $value) {
 					$this->inputFields->setObjectForKey(S($key), $value);

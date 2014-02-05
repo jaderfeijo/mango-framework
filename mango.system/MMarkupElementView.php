@@ -110,7 +110,7 @@
 		 *
 		 * @return void
 		 */
-		public function setProperty(MString $name, MString $value = null) {
+		public function setValueForProperty(MString $name, MString $value = null) {
 			if ($value) {
 				$this->properties->setObjectForKey($name, $value);
 			} else {
@@ -166,6 +166,24 @@
 			} else {
 				return $this->indentLevel;
 			}
+		}
+		
+		/******************** Methods ********************/
+		
+		/**
+		 * @return MArray
+		 */
+		public function subviewsWithPropertyAndValue(MString $property, MString $value) {
+			$views = new MMutableArray();
+			
+			foreach ($this->subviews()->toArray() as $subview) {
+				if ($subview instanceof MMarkupElementView) {
+					if ($subview->valueForProperty($property)->equals($value)) {
+						$views->addObject($subview);
+					}
+				}
+			}
+			return $views;
 		}
 		
 		/******************** MObject Methods ********************/

@@ -63,12 +63,12 @@
 				} else if (is_int($num)) {
 					return MNumber::parseInt($num);
 				} else if (is_string($num)) {
-					
+					return MNumber::parseInt(intval($num));
 				}
 			} else if (is_bool($num)) {
 				return MNumber::parseBool($num);
 			} else if (is_string($num)) {
-				//
+				return MNumber::parseInt($num);
 			}
 		}
 		
@@ -111,7 +111,9 @@
 				$bool = (string)$bool;
 			}
 			
-			if (is_numeric($bool)) {
+			if (is_bool($bool)) {
+				return new MNumber((int)$bool);
+			} else if (is_numeric($bool)) {
 				return new MNumber((int)$bool);
 			} else if (is_string($bool)) {
 				if (strtolower($bool) == "on" || strtolower($bool) == "true" || strtolower($bool) == "yes") {
@@ -119,6 +121,8 @@
 				} else {
 					return new MNumber(0);
 				}
+			} else {
+				return false;
 			}
 		}
 		
@@ -288,6 +292,28 @@
 		}
 		
 		/******************** MObject ********************/
+		
+		/**
+		 *
+		 */
+		public function equals(MMangoObject $object) {
+			return ($this->number == $object->number);
+		}
+		
+		/**
+		 *
+		 */
+		public function compare(MMangoObject $object) {
+			if ($this->isGreaterThan($object)) {
+				return MMangoObject::ORDERED_DESCENDING;
+			} else if ($this->equals($object)) {
+				return MMangoObject::ORDERED_SAME;
+			} else if ($this->isLessThan($object)) {
+				return MMangoObject::ORDERED_ASCENDING;
+			} else {
+				return MMangoObject::ORDERED_SAME;
+			}
+		}
 		
 		/**
 		 * 

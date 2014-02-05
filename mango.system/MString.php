@@ -248,6 +248,22 @@
 		
 		/**
 		 * 
+		 * @return MString
+		 */
+		public function urlEncodedString() {
+			return new MString(urlencode($this->stringValue()));
+		}
+		
+		/**
+		 * 
+		 * @return MString
+		 */
+		public function urlDecodedString() {
+			return new MString(urldecode($this->stringValue()));
+		}
+		
+		/**
+		 * 
 		 *
 		 * @return MArray
 		 */
@@ -351,6 +367,13 @@
 		}
 		
 		/**
+		 *
+		 */
+		public function compare(MMangoObject $object) {
+			return strcmp($this->stringValue(), $object->stringValue());
+		}
+		
+		/**
 		 * 
 		 */
 		public function toString() {
@@ -361,7 +384,7 @@
 		 * 
 		 */
 		public function hash() {
-			return hexdec(md5($this->string));
+			return hexdec(md5($this->stringValue()));
 		}
 		
 	}

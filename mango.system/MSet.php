@@ -170,6 +170,15 @@
 			return $this->set;
 		}
 		
+		/******************** MObject ********************/
+		
+		/**
+		 *
+		 */
+		public function compare(MMangoObject $object) {
+			return N($this->count())->compare(N($object->count()));
+		}
+		
 	}
 
 ?>

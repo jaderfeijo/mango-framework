@@ -28,57 +28,35 @@
 	 * SUCH DAMAGE.
 	 */
 	
-	package('mango.system.html');
+	package('mango.system.exceptions');
 	
 	import('mango.system.*');
+	import('mango.system.io.*');
 	
 	/**
-	 * 
 	 *
 	 * @author Jader Feijo <jader@movinpixel.com>
 	 *
-	 * @license MIT
-	 *
-	 * @package mango.system.html
+	 * @package mango.system.exceptions
 	 *
 	 */
-	class MHTMLHyperlinkView extends MHTMLElementView {
+	class MFileNotFoundException extends MException {
 		
-		//
-		// ************************************************************
-		//
+		protected $filePath;
 		
-		/**
-		 * 
-		 *
-		 * @return MHTMLHyperlinkView
-		 */
-		public function __construct(MString $href = null, MString $text = null) {
-			parent::__construct(S("a"), $text);
-			
-			$this->setHref($href);
+		public function __construct(MString $filePath, MException $previous = null) {
+			parent::__construct(Sf("File at path '%s' could not be found!", $filePath), MException::FILE_NOT_FOUND_EXCEPTION, $previous);
+			$this->filePath = $filePath;
 		}
 		
 		/******************** Properties ********************/
 		
 		/**
-		 * 
-		 *
 		 * @return MString
 		 */
-		public function href() {
-			return $this->valueForProperty(S("href"));
+		public function filePath() {
+			return $this->filePath;
 		}
-		
-		/**
-		 * 
-		 *
-		 * @return void
-		 */
-		public function setHref(MString $href = null) {
-			$this->setValueForProperty(S("href"), $href);
-		}
-		
 	}
 
 ?>

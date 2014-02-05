@@ -53,7 +53,9 @@
 		protected $object;
 		
 		/**
-		 * 
+		 * Initializes a new instance of MInvalidManagedObjectOperationException
+		 *
+		 * This exception is thrown when an invalid operation is performed on a MManagedObject instance
 		 */
 		public function __construct(MManagedObject $object, MString $description = null, MException $previous = null) {
 			if ($description == null) $description = S("Invalid Managed Object Operation Error");

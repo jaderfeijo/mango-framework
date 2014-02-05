@@ -60,7 +60,7 @@
 		public function __construct($index = 0, $lowerBound = 0, $upperBound = 0, MException $previous = null) {
 			MAssertTypes('int', $index, 'int', $lowerBound, 'int', $upperBound);
 			parent::__construct(
-				Sf("Index [%i] out of bounds [%i-%i]", $index, $lowerBound, $upperBound),
+				Sf("Index [%d] out of bounds [%d -> %d]", $index, $lowerBound, $upperBound),
 				MException::NUMBER_OUT_OF_RANGE_EXCEPTION_CODE,
 				$previous
 			);

@@ -33,31 +33,44 @@
 	import('mango.system.*');
 	
 	/**
+	 * This class contains information about a HTTP accepted method
+	 *
+	 * It is used by MApplicationController to describe the accepted methods
+	 * for a view controller
 	 *
 	 * @author Jader Feijo <jader@movinpixel.com>
 	 *
 	 * @package mango.system
-	 *
 	 */
 	class MApplicationControllerAcceptedMethod extends MObject {
 		
 		protected $method;
 		protected $contentTypes;
-		protected $parameters;
 		protected $fields;
 		
+		/**
+		 * Creates a new MApplicationControllerAcceptedMethod instance with the specified
+		 * method.
+		 *
+		 * @param MString $method A string containing the HTTP method this accepted method
+		 * represents
+		 *
+		 * @return MApplicationControllerAcceptedMethod The newly created acceted method
+		 * instance
+		 */
 		public function __construct(MString $method) {
 			parent::__construct();
 			
 			$this->method = $method;
 			$this->contentTypes = new MMutableArray();
-			$this->parameters = new MMutableArray();
 			$this->fields = new MMutableArray();
 		}
 		
 		/******************** Properties ********************/
 		
 		/**
+		 * The HTTP method this accepted method represents
+		 *
 		 * @return MString
 		 */
 		public function method() {
@@ -65,21 +78,23 @@
 		}
 		
 		/**
-		 * @return MArray
+		 * Returns an array containing all accepted content types
+		 *
+		 * @return MArray An array containing all accepted content
+		 * types
 		 */
 		public function contentTypes() {
 			return $this->contentTypes;
 		}
 		
 		/**
-		 * @return MArray
-		 */
-		public function parameters() {
-			return $this->parameters;
-		}
-		
-		/**
-		 * @return MArray
+		 * Returns an array containing instances of MApplicationControllerField
+		 * which describes the accepted fields for this controller
+		 *
+		 * @see MApplicationControllerField 
+		 *
+		 * @return MArray Returns an array containing all the fields accepted
+		 * by this method
 		 */
 		public function fields() {
 			return $this->fields;
@@ -88,6 +103,11 @@
 		/******************** Methods ********************/
 		
 		/**
+		 * Adds the specified content type to the list of content types
+		 * accepted by this method
+		 *
+		 * @param MString A string containing a content type to add
+		 *
 		 * @return void
 		 */
 		public function addContentType(MString $contentType) {
@@ -95,6 +115,11 @@
 		}
 		
 		/**
+		 * Removes the specified content type from the list of content
+		 * types acceted by this method
+		 *
+		 * @param MString A string containing the content type to remove
+		 *
 		 * @return void
 		 */
 		public function removeContentType(MString $contentType) {
@@ -102,6 +127,8 @@
 		}
 		
 		/**
+		 * Removes all content types accepted by this method
+		 *
 		 * @return void
 		 */
 		public function removeAllContentTypes() {
@@ -109,27 +136,11 @@
 		}
 		
 		/**
-		 * @return void
-		 */
-		public function addParameter(MApplicationControllerParameter $parameter) {
-			$this->parameters->addObject($parameter);
-		}
-		
-		/**
-		 * @return void
-		 */
-		public function removeParameter(MApplicationControllerParameter $parameter) {
-			$this->parameters->removeObject($parameter);
-		}
-		
-		/**
-		 * @return void
-		 */
-		public function removeAllParameters() {
-			$this->parameters->removeAllObjects();
-		}
-		
-		/**
+		 * Adds the specified field to this method
+		 *
+		 * @param MApplicationControllerField $field The field instance
+		 * to add
+		 *
 		 * @return void
 		 */
 		public function addField(MApplicationControllerField $field) {
@@ -137,6 +148,11 @@
 		}
 		
 		/**
+		 * Removes the specified field from this method
+		 *
+		 * @param MApplicationControllerField $field The field instance
+		 * to remove
+		 *
 		 * @return void
 		 */
 		public function removeField(MApplicationControllerField $field) {
@@ -144,6 +160,10 @@
 		}
 		
 		/**
+		 * Removes all fields from this method
+		 *
+		 * @see MApplicationControllerField
+		 *
 		 * @return void
 		 */
 		public function removeAllFields() {
@@ -151,19 +171,18 @@
 		}
 		
 		/**
-		 * @return MApplicationControllerParameter
-		 */
-		public function parameterWithName(MString $name) {
-			foreach ($this->parameters()->toArray() as $parameter) {
-				if ($parameter->name()->equals($name)) {
-					return $parameter;
-				}
-			}
-			return null;
-		}
-		
-		/**
-		 * @return MApplicationControllerField
+		 * Returns a field accepted by this method which matches the specified
+		 * name.
+		 *
+		 * This method iterates through all of the accepted MApplicationControllerField
+		 * instances accepted by this class instance, looks for one that matches the
+		 * specified name and returns it. If no field matching the specified name is found,
+		 * this method returns null
+		 *
+		 * @param MString $name The field name to retrieve
+		 * 
+		 * @return MApplicationControllerField A field instance matching the specified name
+		 * or null of none is found
 		 */
 		public function fieldWithName(MString $name) {
 			foreach ($this->fields()->toArray() as $field) {

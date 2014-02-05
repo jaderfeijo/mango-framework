@@ -135,6 +135,21 @@
 		}
 		
 		/**
+		 *
+		 */
+		public function compare(MMangoObject $object) {
+			if ($this > $object) {
+				return MMangoObject::ORDERED_DESCENDING;
+			} else if ($this == $object) {
+				return MMangoObject::ORDERED_SAME;
+			} else if ($this < $object) {
+				return MMangoObject::ORDERED_ASCENDING;
+			} else {
+				return MMangoObject::ORDERED_SAME;
+			}
+		}
+		
+		/**
 		 * 
 		 */
 		public function hash() {

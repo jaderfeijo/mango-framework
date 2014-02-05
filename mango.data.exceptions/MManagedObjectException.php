@@ -51,7 +51,7 @@
 		//
 		
 		/**
-		 * Creates a new exception using the Object that caused the exception to be raised
+		 * Creates a new instance of MManagedObjectException
 		 *
 		 * @param MManagedObject $object The Managed Object that cause the exception to be raised
 		 * @param MString|null $object The description of the error

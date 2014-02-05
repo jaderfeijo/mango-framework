@@ -42,26 +42,104 @@
 	 * @package mango.system.html
 	 *
 	 */
-	class MHTMLDocumentView extends MHTMLView {
+	class MHTMLDocumentView extends MHTMLElementView {
 		
 		//
 		// ************************************************************
 		//
 		
-		protected $title;
+		protected $headElementView;
+		protected $bodyElementView;
+		protected $titleElementView;
 		
 		/**
 		 * 
 		 *
 		 * @return MHTMLDocumentView
 		 */
-		public function __construct() {
-			parent::__construct();
+		public function __construct(MString $title = null) {
+			parent::__construct(S("html"));
 			
-			$this->title = new MString();
+			$this->headElementView = new MHTMLElementView(S("head"));
+			$this->addSubview($this->headElementView);
+			
+			$this->bodyElementView = new MHTMLElementView(S("body"));
+			$this->addSubview($this->bodyElementView);
+			
+			$this->titleElementView = new MHTMLElementView(S("title"), $title);
+			$this->headElementView->addSubview($this->titleElementView);
 		}
 		
 		/******************** Properties ********************/
+		
+		/**
+		 * @return MHTMLElementView
+		 */
+		public function headElementView() {
+			return $this->headElementView;
+		}
+	
+		/**
+		 * @return MHTMLElementView
+		 */
+		public function bodyElementView() {
+			return $this->bodyElementView;
+		}
+	
+		/**
+		 * @return MHTMLElementView
+		 */
+		public function titleElementView() {
+			return $this->titleElementView;
+		}
+		
+		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function addHeadElement(MHTMLElementView $element) {
+			$this->headElementView()->addSubview($element);
+		}
+		
+		/**
+		 *
+		 *
+		 * @return void
+		 */
+		public function removeHeadElement(MHTMLElementView $element) {
+			$this->headElementView()->removeSubview($element);
+		}
+		
+		/**
+		 *
+		 *
+		 * @return MArray
+		 */
+		public function headElements() {
+			return $this->headElementView()->subviews();
+		}
+		
+		/**
+		 * @return void
+		 */
+		public function addBodyElement(MHTMLView $view) {
+			$this->bodyElementView()->addSubview($view);
+		}
+	
+		/**
+		 * @return void
+		 */
+		public function removeBodyElement(MHTMLView $view) {
+			$this->bodyElementView()->removeSubview($view);
+		}
+	
+		/**
+		 * @return MArray
+		 */
+		public function bodyElements() {
+			return $this->bodyElementView()->subviews();
+		}
 		
 		/**
 		 * 
@@ -69,7 +147,7 @@
 		 * @return void
 		 */
 		public function setTitle(MString $title) {
-			$this->title = $title;
+			$this->titleElementView()->setText($title);
 		}
 		
 		/**
@@ -78,31 +156,9 @@
 		 * @return MString
 		 */
 		public function title() {
-			return $this->title;
+			return $this->titleElementView()->text();
 		}
 		
-		/******************** MObject Methods ********************/
-		
-		/**
-		 * 
-		 */
-		public function toString() {
-			$doc = new MMutableString();
-			
-			$doc->appendLine(S("<html>"));
-			$doc->appendLine(S("<head>"));
-			$doc->appendLine(MString::stringWithFormat("<title>%s</title>", $this->title()));
-			$doc->appendLine(S("</head>"));
-			$doc->appendLine(S("<body>"));
-			
-			// Layout all the subviews inside this document
-			$doc->appendLine(parent::toString());
-			
-			$doc->appendLine(S("</body>"));
-			$doc->appendString(S("</html>"));
-			
-			return $doc;
-		}
 	}
 
 ?>

@@ -31,6 +31,8 @@
 	package('mango.data');
 	
 	import('mango.system.*');
+	import('mango.system.io.*');
+	import('mango.system.exceptions.*');
 	
 	/**
 	 *
@@ -92,6 +94,53 @@
 			$this->persistentStoreCoordinator()->setManagedObjectContext($this);
 		}
 		
+		/******************** Private ********************/
+		
+		/**
+		 * @return MManagedObject
+		 */
+		private function _parseObjectFromXML(SimpleXMLElement $xmlObject) {
+			$entityName = S($xmlObject->getName());
+			$entity = $this->entityForName($entityName);
+			if ($entity) {
+				$object = $this->newObjectForEntity($entity);
+				if ($object) {
+					foreach ($xmlObject->children() as $xmlAttribute) {
+						$attribute = $entity->attributeWithName(S($xmlAttribute->getName()));
+						if ($attribute instanceof MEntityDescriptionProperty) {
+							if ($attribute->type() == MEntityDescriptionProperty::StringType) {
+								$object->setObjectForAttribute($attribute, S((string)$xmlAttribute));
+							} else if ($attribute->type() == MEntityDescriptionProperty::IntegerType) {
+								$object->setObjectForAttribute($attribute, N((int)$xmlAttribute));
+							} else if ($attribute->type() == MEntityDescriptionProperty::FloatType) {
+								$object->setObjectForAttribute($attribute, N((float)$xmlAttribute));
+							} else if ($attribute->type() == MEntityDescriptionProperty::BooleanType) {
+								$object->setObjectForAttribute($attribute, N((bool)$xmlAttribute));
+							} else if ($attribute->type() == MEntityDescriptionProperty::DateType) {
+								$object->setObjectForAttribute($attribute, MDate::parse((string)$xmlAttribute));
+							} else if ($attribute->type() == MEntityDescriptionProperty::BinaryType) {
+								$object->setObjectForAttribute($attribute, MData::dataWithBytes((string)$xmlAttribute));
+							} else {
+								throw new MInvalidDataTypeException(S("StringType|IntegerType|FloatType|BooleanType|DateType|BinaryType"), S($attribute->type()));
+							}
+						} else if ($attribute instanceof MEntityDescriptionRelationship) {
+							foreach ($xmlAttribute->children() as $xmlRelationshipObject) {
+								$object->addObjectToRelationship($attribute, $this->_parseObjectFromXML($xmlRelationshipObject));
+							}
+						} else {
+							throw new MManagedObjectException($object, Sf("Attribute type '%s' not supported", $attribute->className()));
+						}
+					}
+					
+					return $object;
+				} else {
+					throw new MManagedObjectException($object, S("Could not create object"));
+				}
+			} else {
+				throw new MEntityNotFoundException($entityName);
+			}
+		}
+		
 		/******************** Properties ********************/
 		
 		/**
@@ -112,6 +161,8 @@
 		public function managedObjects() {
 			return $this->managedObjects;
 		}
+		
+		/******************** Methods ********************/
 		
 		/**
 		 * Returns an Array containing all the Managed Objects that have been removed within
@@ -140,47 +191,51 @@
 		 * @return MArray An Array containing the parsed objects
 		 */
 		public function parseObjectsFromFile(MFile $file) {
-			$objects = new MMutableArray();
+			if (!$file->exists()) throw new MFileNotFoundException($file->path());
 			
 			$xml = simplexml_load_file($file->path()->stringValue());
+			return $this->parseObjectsFromXML($xml);
+		}
+		
+		/**
+		 * Parses one or more Managed Objects from inside the specified XML data
+		 * and inserts them into this Managed Object Context
+		 *
+		 * @param MData $data A data object containing the XML representation of the objects to be parsed
+		 *
+		 * @return MArray An Array containing the parsed objects
+		 */
+		public function parseObjectsFromData(MData $data) {
+			$xml = simplexml_load_string($data->getBytes());
+			return $this->parseObjectsFromXML($xml);
+		}
+		
+		/**
+		 * Parses one or more Managed Objects from inside the specified XML string
+		 * and inserts them into this Managed Object Context
+		 *
+		 * @param MString $string A string containing the XML representation of the objects to be parsed
+		 *
+		 * @return MArray An Array containing the parsed objects
+		 */
+		public function parseObjectsFromString(MString $string) {
+			$xml = simplexml_load_string($string->stringValue());
+			return $this->parseObjectsFromXML($xml);
+		}
+		
+		/**
+		 * Parses one or more Managed Objects from inside the specified SimpleXMLElement object
+		 * and inserts them into this Managed Object Context
+		 *
+		 * @param SimpleXMLElement $xml A SimpleXMLElement object containing the objects to be parsed
+		 *
+		 * @return MArray An Array containing the parsed objects
+		 */
+		public function parseObjectsFromXML(SimpleXMLElement $xml) {
+			$objects = new MMutableArray();
 			foreach ($xml->children() as $xmlObject) {
-				$entityName = S($xmlObject->getName());
-				$entity = $this->entityForName($entityName);
-				if ($entity) {
-					$object = $this->newObjectForEntity($entity);
-					if ($object) {
-						foreach ($xmlObject->children() as $xmlAttribute) {
-							$attribute = $entity->attributeWithName(S($xmlAttribute->getName()));
-							if ($attribute instanceof MEntityDescriptionProperty) {
-								if ($attribute->type() == MEntityDescriptionProperty::StringType) {
-									$object->setObjectForAttribute($attribute, S((string)$xmlAttribute));
-								} else if ($attribute->type() == MEntityDescriptionProperty::IntegerType) {
-									$object->setObjectForAttribute($attribute, N((int)$xmlAttribute));
-								} else if ($attribute->type() == MEntityDescriptionProperty::FloatType) {
-									$object->setObjectForAttribute($attribute, N((float)$xmlAttribute));
-								} else if ($attribute->type() == MEntityDescriptionProperty::BooleanType) {
-									$object->setObjectForAttribute($attribute, N((bool)$xmlAttribute));
-								} else if ($attribute->type() == MEntityDescriptionProperty::DateType) {
-									$object->setObjectForAttribute($attribute, MDate::parse((string)$xmlAttribute));
-								} else if ($attribute->type() == MEntityDescriptionProperty::BinaryType) {
-									$object->setObjectForAttribute($attribute, MData::dataWithBytes((string)$xmlAttribute));
-								} else {
-									throw new MInvalidDataTypeException(S("StringType|IntegerType|FloatType|BooleanType|DateType|BinaryType"), S($attribute->type()));
-								}
-							} else if ($attribute instanceof MEntityDescriptionRelationship) {
-								throw new MMethodNotSupportedException(S("MEntityDescriptionRelationship"));
-							}
-						}
-						
-						$objects->addObject($object);
-					} else {
-						throw new MManagedObjectException($object, S("Could not create object"));
-					}
-				} else {
-					throw new MEntityNotFoundException($entityName);
-				}
+				$objects->addObject($this->_parseObjectFromXML($xmlObject));
 			}
-			
 			return $objects;
 		}
 		
