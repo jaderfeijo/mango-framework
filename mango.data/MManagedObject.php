@@ -144,6 +144,8 @@
 			$this->initDefaultValues();
 			
 			$this->context()->insertObject($this);
+			
+			$this->didCreateObject();
 		}
 		
 		/******************** Protected ********************/
@@ -523,6 +525,22 @@
 		}
 		
 		/******************** Methods ********************/
+		
+		/**
+		 * Subclasses of MManagedObject should override this method.
+		 *
+		 * This method is called by the constructor every time a new instance of MManagedObject
+		 * is created. This gives a chance for subclasses of MManagedObject to do any initialization
+		 * they may need.
+		 *
+		 * Subclasses of MManagedObject should override this method instead of __construct if they
+		 * need to do any custom initialization
+		 *
+		 * @return void
+		 */
+		public function didCreateObject() {
+			// the default implementation of this method doesn't do anything
+		}
 		
 		/**
 		 * Returns the Object which represents the value for an attribute of this object
