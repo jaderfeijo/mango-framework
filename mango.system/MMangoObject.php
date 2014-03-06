@@ -100,6 +100,15 @@
 		public function fullClassName();
 		
 		/**
+		 * Returns a boolean indicating whether this object is of the
+		 * specified class or has the class as one of its parents
+		 *
+		 * @return bool A boolean value idicating whether this object
+		 * is of the specified class or inherits from it
+		 */
+		public function isKindOfClass(MString $class);
+		
+		/**
 		 * Returns a String representation of the current object
 		 *
 		 * @return MString A String representation of the current object

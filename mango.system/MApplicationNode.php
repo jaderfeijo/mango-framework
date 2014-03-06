@@ -30,8 +30,6 @@
 	
 	package('mango.system');
 	
-	import('mango.system.exceptions.*');
-	
 	/**
 	 * 
 	 *
@@ -42,81 +40,108 @@
 	 * @package mango.system
 	 *
 	 */
-	class MApplicationNamespace extends MApplicationNode {
+	class MApplicationNode extends MObject {
+		
+		protected $name;
+		protected $parentNode;
+		protected $childNodes;
 		
 		/**
-		 *
-		 * @param $namespaceElement
-		 *
-		 * @return MApplicationNamespace
+		 * 
+		 * @return MApplicationNode
 		 */
-		public static function parseFromXMLElement($namespaceElement, $name = null) {
-			$namespaceName = $name;
-			if (is_null($namespaceName)) {
-				$namespaceName = S($namespaceElement['name']);
-			}
-			$namespace = new MApplicationNamespace($namespaceName);
+		public function __construct(MString $name = null) {
+			parent::__construct();
 			
-			foreach ($namespaceElement as $element) {
-				if ($element->getName() == "controller") {
-					$namespace->addChildNode(MApplicationController::parseFromXMLElement($element));
-				} else if ($element->getName() == "namespace") {
-					$namespace->addChildNode(MApplicationNamespace::parseFromXMLElement($element));
-				} else {
-					throw new MParseErrorException(null, null, Sf("Unknown element '%s'", $element->getName()));
+			$this->name = ($name ? $name : S(""));
+			$this->parentNode = null;
+			$this->childNodes = new MMutableArray();
+		}
+		
+		/******************** Properties ********************/
+		
+		/**
+		 * @return MString
+		 */
+		public function name() {
+			return $this->name;
+		}
+		
+		/**
+		 * @return MApplicationNode
+		 */
+		public function parentNode() {
+			return $this->parentNode;
+		}
+		
+		/******************** Protected ********************/
+		
+		/**
+		 * @return void
+		 */
+		protected function setParentNode(MApplicationNode $parentNode = null) {
+			$this->parentNode = $parentNode;
+		}
+		
+		/******************** Properties ********************/
+		
+		/**
+		 * @return void
+		 */
+		public function addChildNode(MApplicationNode $node) {
+			$this->childNodes->addObject($node);
+			$node->setParentNode($this);
+		}
+		
+		/**
+		 * @return void
+		 */
+		public function removeChildNode(MApplicationNode $node) {
+			if ($this->childNodes->removeObject($node)) {
+				$node->setParentNode(null);
+			}
+		}
+		
+		/**
+		 * @return void
+		 */
+		public function removeAllChildNodes() {
+			$this->childNodes->removeAllObjects();
+		}
+		
+		/**
+		 * @return MArray
+		 */
+		public function childNodes() {
+			return $this->childNodes;
+		}
+		
+		/**
+		 * @return MApplicationNode
+		 */
+		public function childNodeWithName(MString $name) {
+			foreach ($this->childNodes()->toArray() as $node) {
+				if ($node->name()->equals($name)) {
+					return $node;
 				}
 			}
-			
-			return $namespace;
+			return null;
 		}
 		
-		//
-		// ************************************************************
-		//
-		
 		/**
-		 * @return MApplicationNamespace
+		 * @return bool
 		 */
-		public function __construct(MString $name) {
-			if (!$name->isEmpty()) {
-				parent::__construct($name);
-			} else {
-				throw new MInvalidOperationException(S("Cannot instantiate a namespace with an empty name"));
-			}
+		public function hasChildNodes() {
+			return ($this->childNodes()->count() > 0);
 		}
 		
-		/******************** MApplicationNode ********************/
-		
 		/**
-		 *
-		 *
 		 * @return MViewController
 		 */
-		public function viewControllerForPath(MArray $path) {			
-			$viewController = null;
-			
-			$name = S("");
-			if ($path->count() > 0) {
-				$name = $path->objectAtIndex(0);
-			}
-			
-			$subpath = new MArray();
-			if ($path->count() > 1) {
-				$subpath = $path->subarrayFromIndex(1);
-			}
-			
-			$node = $this->childNodeWithName($name);
-			if ($node) {
-				$viewController = $node->viewControllerForPath($subpath);
-			}
-			
-			if ($viewController) {
-				return $viewController;
-			} else {
-				return parent::viewControllerForPath($path);
-			}
+		public function viewControllerForPath(MArray $path) {
+			return null;
 		}
 		
 	}
-
+	
 ?>

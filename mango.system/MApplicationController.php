@@ -48,12 +48,106 @@
 	 * @package mango.system
 	 *
 	 */
-	class MApplicationController extends MObject {
+	class MApplicationController extends MApplicationNode {
+		
+		/**
+		 *
+		 * @param $controllerElement
+		 *
+		 * @return MApplicationController
+		 */
+		public function parseFromXMLElement($controllerElement) {
+			$controller = new MApplicationController(S($controllerElement['class']), S($controllerElement['name']));
+			
+			foreach ($controllerElement as $attributeElement) {
+				if ($attributeElement->getName() == "controller") {
+					$controller->addChildNode(MApplicationController::parseFromXMLElement($attributeElement));
+				} else if ($attributeElement->getName() == "namespace") {
+					$controller->addChildNode(MApplicationController::parseFromXMLElement($attributeElement));
+				} else if ($attributeElement->getName() == "parameter") {
+					$required = true;
+					if (isset($attributeElement['required'])) {
+						$required = MNumber::parseBool((string)$attributeElement['required'])->boolValue();
+					}
+					
+					if ($attributeElement['type'] == "String") {
+						$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::StringType, $required));
+					} else if ($attributeElement['type'] == "Integer") {
+						$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::IntegerType, $required));
+					} else if ($attributeElement['type'] == "Float") {
+						$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::FloatType, $required));
+					} else if ($attributeElement['type'] == "Boolean") {
+						$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::BooleanType, $required));
+					} else if ($attributeElement['type'] == "Date") {
+						$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::DateType, $required));
+					} else if ($attributeElement['type'] == "Binary") {
+						$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::Binary, $required));
+					} else if ($attributeElement['type'] == "Array") {
+						$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::ArrayType, $required));
+					} else if ($attributeElement['type'] == "Dictionary") {
+						$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::DictionaryType, $required));
+					} else {
+						throw new MParseErrorException(null, null, Sf("Unknown type '%s'", $parameterElement['type']));
+					}
+				} else if ($attributeElement->getName() == "accept") {
+					$acceptedMethod = new MApplicationControllerAcceptedMethod(S($attributeElement['method']));
+					foreach ($attributeElement as $acceptElement) {
+						if ($acceptElement->getName() == "content-types") {
+							foreach ($acceptElement as $contentTypeElement) {
+								$acceptedMethod->addContentType(S($contentTypeElement));
+							}
+						} else if ($acceptElement->getName() == "fields") {
+							foreach ($acceptElement as $fieldElement) {
+								$required = true;
+								if (isset($fieldElement['required'])) {
+									$required = MNumber::parseBool((string)$fieldElement['required'])->boolValue();
+								}
+								
+								if ($fieldElement['type'] == "String") {
+									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::StringType, $required));
+								} else if ($fieldElement['type'] == "Integer") {
+									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::IntegerType, $required));
+								} else if ($fieldElement['type'] == "Float") {
+									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::FloatType, $required));
+								} else if ($fieldElement['type'] == "Boolean") {
+									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::BooleanType, $required));
+								} else if ($fieldElement['type'] == "Date") {
+									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::DateType, $required));
+								} else if ($fieldElement['type'] == "Binary") {
+									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::BinaryType, $required));
+								} else if ($fieldElement['type'] == "Array") {
+									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::ArrayType, $required));
+								} else if ($fieldElement['type'] == "Dictionary") {
+									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::DictionaryType, $required));
+								} else {
+									throw new MParseErrorException(null, null, Sf("Unknown type '%s'", $fieldElement['type']));
+								}
+							}
+						} else {
+							throw new MParseErrorException(null, null, Sf("Unknown element '%s'", $acceptElement->getName()));
+						}
+					}
+					$controller->addAcceptedMethod($acceptedMethod);
+				} else {
+					throw new MParseErrorException(null, null, Sf("Unknown element '%s'", $attributeElement->getName()));
+				}
+			}
+			
+			if ($controller->acceptedMethods()->count() <= 0) {
+				$controller->addAcceptedMethod(new MApplicationControllerAcceptedMethod(S("GET")));
+			}
+			
+			return $controller;
+		}
+		
+		//
+		// ************************************************************
+		//
 		
 		protected $controllerClassName;
-		protected $name;
 		protected $parameters;
 		protected $acceptedMethods;
+		protected $parameterValues;
 		
 		/**
 		 * Creates a new application controller instance with the specified view controller class name
@@ -66,12 +160,12 @@
 		 * @return MApplicationController The newly created MApplicationController instance
 		 */
 		public function __construct(MString $controllerClassName, MString $name = null) {
-			parent::__construct();
+			parent::__construct($name);
 			
 			$this->controllerClassName = $controllerClassName;
-			$this->name = ($name ? $name : S(""));
 			$this->parameters = new MMutableArray();
 			$this->acceptedMethods = new MMutableArray();
+			$this->parameterValues = new MMutableArray();
 		}
 		
 		/******************** Properties ********************/
@@ -84,15 +178,6 @@
 		 */
 		public function controllerClassName() {
 			return $this->controllerClassName;
-		}
-		
-		/**
-		 * Returns the name of this controller
-		 *
-		 * @return MString This controller's name
-		 */
-		public function name() {
-			return $this->name;
 		}
 		
 		/**
@@ -133,6 +218,17 @@
 			return $this->acceptedMethods;
 		}
 		
+		/**
+		 * Returns an array of the consumed parameter values for this view controller.
+		 * The values are passed in via the consumeParameterValues() method.
+		 *
+		 * @return MArray An array contining all the parameter values which
+		 * were consumed by this controller
+		 */
+		public function parameterValues() {
+			return $this->parameterValues;
+		}
+		
 		/******************** Methods ********************/
 		
 		/**
@@ -152,7 +248,7 @@
 		 * Removes the specified MApplicationControllerParameter instance from the
 		 * list of accepted parameters for this controller
 		 *
-		 * @param MApplicationControllerParameter The application controller parameter
+		 * @param MApplicationControllerParameter $parameter The application controller parameter
 		 * instance to remove
 		 *
 		 * @return void
@@ -174,7 +270,7 @@
 		 * Returns a MApplicationControllerParamter instance matching the specified
 		 * name. If no matching parameter is found, this method returns null
 		 *
-		 * @param MString $name The name of the applicatio parameteryou wish to
+		 * @param MString $name The name of the application parameter you wish to
 		 * retrieve
 		 *
 		 * @return MApplicationControllerParameter The parameter instance matching
@@ -269,6 +365,122 @@
 				}
 			}
 			return null;
+		}
+		
+		/**
+		 * This method returns a new instance of the MViewController subclass this MApplicationController
+		 * represents, initialised with the specified parameters.
+		 *
+		 * @param MArray $parameters An array containing the parameters with which to initialise the
+		 * new MViewController instance
+		 *
+		 * @return MViewController returns an instance of the MViewController this Application
+		 * controller represents with the specified parameters
+		 */
+		public function newViewControllerInstanceWithParameters(MArray $parameters) {
+			$reflectionClass = MObject::reflectionClass($this->controllerClassName());
+			$reflectionConstructor = $reflectionClass->getMethod("__construct");
+			
+			// validate number of parameters
+			if ($this->parameters()->count() != $reflectionConstructor->getNumberOfParameters()) {
+				throw new MException(Sf("The number of parameters in the manifest doesn't match the number of parameters declared in the constructor for the '%s' class", $this->controllerClassName()));
+			}
+			if ($this->requiredParameters()->count() != $reflectionConstructor->getNumberOfRequiredParameters()) {
+				throw new MException(Sf("The number of required parameters in the manifest doesn't match the number of required parameters declared in the constructor for the '%s' class", $this->controllerClassName()));
+			}
+			if ($parameters->count() < $reflectionConstructor->getNumberOfRequiredParameters()) {
+				throw new MBadRequestException();
+			}
+			
+			
+			if ($parameters->count() > 0) {
+				$formattedParameters = new MMutableArray();
+				for ($i = 0; $i < $parameters->count(); $i++) {
+					$controllerParameter = $this->parameters()->objectAtIndex($i);
+					$parameterValue = $parameters->objectAtIndex($i);
+					$parameterObject = null;
+					if ($controllerParameter->type() == MApplicationControllerParameter::StringType) {
+						$parameterObject = $parameterValue;
+					} else if ($controllerParameter->type() == MApplicationControllerParameter::IntegerType) {
+						$parameterObject = MNumber::parseInt($parameterValue);
+					} else if ($controllerParameter->type() == MApplicationControllerParameter::FloatType) {
+						$parameterObject = MNumber::parseFloat($parameterValue);
+					} else if ($controllerParameter->type() == MApplicationControllerParameter::BooleanType) {
+						$parameterObject = MNumber::parseBool($parameterValue);
+					} else if ($controllerParameter->type() == MApplicationControllerParameter::DateType) {
+						$parameterObject = MDate::parseString($parameterValue);
+					} else if ($controllerParameter->type() == MApplicationControllerParameter::BinaryType) {
+						$parameterObject = MData::parseBase64String($parameterValue);
+					} else if ($controllerParameter->type() == MApplicationControllerParameter::ArrayType) {
+						$parameterObject = $parameterValue->componentsSeparatedByString(S("|"));
+					} else if ($controllerParameter->type() == MApplicationControllerParameter::DictionaryType) {
+						$parameterObject = MDictionary::parseString($parameterValue);
+					}
+					
+					if ($parameterObject) {
+						$formattedParameters->addObject($parameterObject);
+					} else {
+						throw new MException(Sf("Unknown error while parsing parameter named '%s'", $controllerParameter->name()));
+					}
+				}
+				return $reflectionClass->newInstanceArgs($formattedParameters->toArray());
+			} else {
+				return $reflectionClass->newInstance();
+			}
+		}
+		
+		/******************** MApplicationNode ********************/
+		
+		/**
+		 *
+		 *
+		 * @return MViewController
+		 */
+		public function viewControllerForPath(MArray $path) {
+			$viewController = null;
+			$childViewController = null;
+		
+			if ($this->hasChildNodes()) {
+				if ($path->count() > 0) {
+					$numberOfRequiredParameters = $this->requiredParameters()->count();
+					if ($path->count() >= $numberOfRequiredParameters) {
+						if ($path->count() > $numberOfRequiredParameters) {
+							$nodePath = $path->subarrayFromIndex($numberOfRequiredParameters);
+							$node = $this->childNodeWithName($nodePath->objectAtIndex(0));
+							if ($node) {
+								$subpath = new MArray();
+								if ($nodePath->count() > 1) {
+									$subpath = $nodePath->subarrayFromIndex(1);
+								}
+								$childViewController = $node->viewControllerForPath($subpath);
+							}
+						}
+					
+						if ($childViewController) {
+							$requiredParameters = $path->subarrayToIndex($numberOfRequiredParameters - 1);
+							$viewController = $this->newViewControllerInstanceWithParameters($requiredParameters);
+						} else {
+							$viewController = $this->newViewControllerInstanceWithParameters($path);
+						}
+					} else {
+						throw new MBadRequestException();
+					}
+				} else {
+					$viewController = $this->newViewControllerInstanceWithParameters($path);
+				}
+			} else {
+				$viewController = $this->newViewControllerInstanceWithParameters($path);
+			}
+			
+			if ($viewController) {
+				$viewController->setApplicationController($this);
+				if ($childViewController) {
+					$viewController->addChildViewController($childViewController);
+				}
+				return $viewController;
+			} else {
+				return parent::viewControllerForPath($path);
+			}
 		}
 		
 	}

@@ -73,6 +73,7 @@
 		//
 		
 		protected $delegate;
+		protected $errorViewControllerClass;
 		protected $defaultNamespace;
 		protected $rootViewController;
 		
@@ -89,7 +90,10 @@
 		public function __construct(MString $delegateClass = null) {
 			parent::__construct();
 			
-			MApplication::$application = $this;
+			$this->delegate = null;
+			$this->errorViewControllerClass = null;
+			$this->defaultNamespace = null;
+			$this->rootViewController = null;
 			
 			if (!$this->isRoutingEnabled()) {
 				$this->enableRouting();
@@ -100,137 +104,25 @@
 				MDie($redirect);
 			}
 			
-			$this->rootViewController = null;
-			
 			if ($delegateClass) {
 				$this->delegate = MObject::newInstanceOfClass($delegateClass);
 			} else if (MFile::fileExists("resources/manifest.xml")) {
 				$xmlManifest = simplexml_load_file("resources/manifest.xml");
 				$this->delegate = MObject::newInstanceOfClass(S($xmlManifest['delegate']));
-				$this->defaultNamespace = $this->parseNamespaceElement($xmlManifest);
+				$this->errorViewControllerClass = S($xmlManifest['errorClass']);
+				try {
+					$this->defaultNamespace = MApplicationNamespace::parseFromXMLElement($xmlManifest, S("application"));
+				} catch (Exception $e) {
+					throw MParseErrorException(S("resources/manifest.xml"), null, null, $e);
+				}
 			} else {
 				$this->delegate = new MApplicationDelegate();
 			}
+			
+			MApplication::$application = $this;
 		}
 		
 		/******************** Protected ********************/
-		
-		/**
-		 * @internal
-		 *
-		 * @param $namespaceElement
-		 *
-		 * @return MApplicationNamespace
-		 */
-		public function parseNamespaceElement($namespaceElement) {
-			$namespace = new MApplicationNamespace(S($namespaceElement['name']));
-			$namespace->setErrorViewControllerClass(S($namespaceElement['errorClass']));
-			
-			foreach ($namespaceElement as $element) {
-				if ($element->getName() == "controller") {
-					if (is_null($element['name'])) {
-						$namespace->setMainController($this->parseControllerElement($element));
-					} else {
-						$namespace->addController($this->parseControllerElement($element));
-					}
-				} else if ($element->getName() == "namespace") {
-					$namespace->addChildNamespace($this->parseNamespaceElement($element));
-				} else {
-					throw new MParseErrorException(S("resources/manifest.xml"), null, Sf("Unknown element '%s'", $element->getName()));
-				}
-			}
-			
-			return $namespace;
-		}
-		
-		/**
-		 * @internal
-		 *
-		 * @param $controllerElement
-		 *
-		 * @return MApplicationController
-		 */
-		public function parseControllerElement($controllerElement) {
-			$controller = new MApplicationController(S($controllerElement['class']), S($controllerElement['name']));
-			
-			foreach ($controllerElement as $attributeElement) {
-				if ($attributeElement->getName() == "parameters") {
-					foreach ($attributeElement as $parameterElement) {
-						$required = true;
-						if (isset($parameterElement['required'])) {
-							$required = MNumber::parseBool((string)$parameterElement['required'])->boolValue();
-						}
-
-						if ($parameterElement['type'] == "String") {
-							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::StringType, $required));
-						} else if ($parameterElement['type'] == "Integer") {
-							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::IntegerType, $required));
-						} else if ($parameterElement['type'] == "Float") {
-							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::FloatType, $required));
-						} else if ($parameterElement['type'] == "Boolean") {
-							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::BooleanType, $required));
-						} else if ($parameterElement['type'] == "Date") {
-							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::DateType, $required));
-						} else if ($parameterElement['type'] == "Binary") {
-							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::Binary, $required));
-						} else if ($parameterElement['type'] == "Array") {
-							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::ArrayType, $required));
-						} else if ($parameterElement['type'] == "Dictionary") {
-							$controller->addParameter(new MApplicationControllerParameter(S($parameterElement['name']), MApplicationControllerParameter::DictionaryType, $required));
-						} else {
-							throw new MParseErrorException(S("resources/manifest.xml"), null, Sf("Unknown type '%s'", $parameterElement['type']));
-						}
-					}
-				} else if ($attributeElement->getName() == "accept") {
-					$acceptedMethod = new MApplicationControllerAcceptedMethod(S($attributeElement['method']));
-					foreach ($attributeElement as $acceptElement) {
-						if ($acceptElement->getName() == "content-types") {
-							foreach ($acceptElement as $contentTypeElement) {
-								$acceptedMethod->addContentType(S($contentTypeElement));
-							}
-						} else if ($acceptElement->getName() == "fields") {
-							foreach ($acceptElement as $fieldElement) {
-								$required = true;
-								if (isset($fieldElement['required'])) {
-									$required = MNumber::parseBool((string)$fieldElement['required'])->boolValue();
-								}
-								
-								if ($fieldElement['type'] == "String") {
-									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::StringType, $required));
-								} else if ($fieldElement['type'] == "Integer") {
-									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::IntegerType, $required));
-								} else if ($fieldElement['type'] == "Float") {
-									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::FloatType, $required));
-								} else if ($fieldElement['type'] == "Boolean") {
-									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::BooleanType, $required));
-								} else if ($fieldElement['type'] == "Date") {
-									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::DateType, $required));
-								} else if ($fieldElement['type'] == "Binary") {
-									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::BinaryType, $required));
-								} else if ($fieldElement['type'] == "Array") {
-									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::ArrayType, $required));
-								} else if ($fieldElement['type'] == "Dictionary") {
-									$acceptedMethod->addField(new MApplicationControllerField(S($fieldElement['name']), MApplicationControllerField::DictionaryType, $required));
-								} else {
-									throw new MParseErrorException(S("resources/manifest.xml"), null, Sf("Unknown type '%s'", $fieldElement['type']));
-								}
-							}
-						} else {
-							throw new MParseErrorException(S("resources/manifest.xml"), null, Sf("Unknown element '%s'", $acceptElement->getName()));
-						}
-					}
-					$controller->addAcceptedMethod($acceptedMethod);
-				} else {
-					throw new MParseErrorException(S("resources/manifest.xml"), null, Sf("Unknown element '%s'", $attributeElement->getName()));
-				}
-			}
-			
-			if ($controller->acceptedMethods()->count() <= 0) {
-				$controller->addAcceptedMethod(new MApplicationControllerAcceptedMethod(S("GET")));
-			}
-			
-			return $controller;
-		}
 		
 		/**
 		 * @internal
@@ -262,6 +154,63 @@
 			MLog("[EnableRouting]: File created");
 		}
 		
+		/******************** Properties ********************/
+		
+		/**
+		 * Returns the Application Delegate instance used by this application
+		 *
+		 * @return MApplicationDelegate The Application Delegate instance for this
+		 * application
+		 */
+		public function delegate() {
+			return $this->delegate;
+		}
+		
+		/**
+		 * Sets the MErrorViewController subclass this application should use for handling
+		 * errors
+		 *
+		 * This should be the fully qualified class name
+		 *
+		 * If this value is set to null or an empty string, the application will use the
+		 * system's default error view controller
+		 *
+		 * @param MString $errorViewControllerClass The fully qualified class name to use
+		 * for error handling
+		 *
+		 * @return void
+		 */
+		public function setErrorViewControllerClass(MString $errorViewControllerClass = null) {
+			$this->errorViewControllerClass = $errorViewControllerClass;
+		}
+		
+		/**
+		 * Returns the MErrorViewController subclass this application will use for handling
+		 * errors
+		 *
+		 * @return MString A string containing the fully qualified error view controller
+		 * class name
+		 */
+		public function errorViewControllerClass() {
+			if ($this->errorViewControllerClass) {
+				if (!$this->errorViewControllerClass->isEmpty()) {
+					return $this->errorViewControllerClass;
+				}
+			}
+			return S("mango.system.MErrorViewController");
+		}
+		
+		/**
+		 * Returns the default namespace for this application.
+		 *
+		 * @return MApplicationNamespace The default namespace used by this application
+		 */
+		public function defaultNamespace() {
+			if (!$this->defaultNamespace) {
+				$this->defaultNamespace = new MApplicationNamespace(S(""));
+			}
+			return $this->defaultNamespace;
+		}
 		
 		/**
 		 * Returns the root view controller for this current instance of the application.
@@ -278,30 +227,6 @@
 				$this->rootViewController = $this->defaultNamespace()->viewControllerForPath(MHTTPRequest()->arguments());
 			}
 			return $this->rootViewController;
-		}
-		
-		/******************** Properties ********************/
-		
-		/**
-		 * Returns the default namespace for this application.
-		 *
-		 * @return MApplicationNamespace The default namespace used by this application
-		 */
-		public function defaultNamespace() {
-			if (!$this->defaultNamespace) {
-				$this->defaultNamespace = new MApplicationNamespace(S(""));
-			}
-			return $this->defaultNamespace;
-		}
-		
-		/**
-		 * Returns the Application Delegate instance used by this application
-		 *
-		 * @return MApplicationDelegate The Application Delegate instance for this
-		 * application
-		 */
-		public function delegate() {
-			return $this->delegate;
 		}
 		
 		/******************** Methods ********************/
@@ -328,28 +253,30 @@
 		 * @return void
 		 */
 		public function run() {
+			$viewController = null;
+			
 			try {
 				$this->delegate->applicationDidLoad();
 				$viewController = $this->rootViewController();
-				
-				MSendResponse(new MHTTPViewControllerResponse($viewController));
 			} catch (MBadRequestException $e) {
-				$viewController = MObject::newInstanceOfClassWithParameters($this->defaultNamespace()->errorViewControllerClass(), A(
+				logException($e);
+				$viewController = MObject::newInstanceOfClassWithParameters($this->errorViewControllerClass(), A(
 					MHTTPResponse::RESPONSE_BAD_REQUEST, N(MHTTPResponse::RESPONSE_BAD_REQUEST), S("Bad Request"), $e->description()
 				));
-				
-				logException($e);
-				
-				MSendResponse(new MHTTPViewControllerResponse($viewController));
 			} catch (MException $e) {
-				$viewController = MObject::newInstanceOfClassWithParameters($this->defaultNamespace()->errorViewControllerClass(), A(
+				logException($e);
+				$viewController = MObject::newInstanceOfClassWithParameters($this->errorViewControllerClass(), A(
 					MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR, N(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR), S("Internal Server Error"), S("Sorry but the page you are looking for could not be loaded due to an internal server error")
 				));
-				
-				logException($e);
-				
-				MSendResponse(new MHTTPViewControllerResponse($viewController));
 			}
+			
+			if (!$viewController) {
+				$viewController = MObject::newInstanceOfClassWithParameters($this->errorViewControllerClass(), A(
+					MHTTPResponse::RESPONSE_NOT_FOUND, N(MHTTPResponse::RESPONSE_NOT_FOUND), S("Not Found"), S("Sorry but the page you are looking for could not be found")
+				));
+			}
+			
+			MSendResponse(new MHTTPViewControllerResponse($viewController));
 		}
 	
 	}

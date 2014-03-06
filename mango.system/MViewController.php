@@ -59,6 +59,8 @@
 		protected $authenticatedUserName;
 		protected $parameterValues;
 		protected $fieldValues;
+		protected $parentViewController;
+		protected $childViewControllers;
 		
 		/**
 		 * 
@@ -79,6 +81,8 @@
 			$this->authenticatedUserName = null;
 			$this->parameterValues = null;
 			$this->fieldValues = null;
+			$this->parentViewController = null;
+			$this->childViewControllers = new MMutableArray();
 		}
 		
 		/******************** Protected ********************/
@@ -331,6 +335,43 @@
 		}
 		
 		/******************** Properties ********************/
+		
+		/**
+		 * @return MViewController
+		 */
+		public function parentViewController() {
+			return $this->parentViewController;
+		}
+		
+		/**
+		 * @return void
+		 */
+		public function setParentViewController(MViewController $viewController = null) {
+			$this->parentViewController = $viewController;
+		}
+		
+		/**
+		 * @return MArray
+		 */
+		public function childViewControllers() {
+			return $this->childViewControllers;
+		}
+		
+		/**
+		 * @return void
+		 */
+		public function addChildViewController(MViewController $viewController) {
+			$this->childViewControllers->addObject($viewController);
+			$viewController->setParentViewController($this);
+		}
+		
+		/**
+		 * @return void
+		 */
+		public function removeChildViewController(MViewController $viewController) {
+			$this->childViewControllers->removeObject($viewController);
+			$viewController->setParentViewController(null);
+		}
 		
 		/**
 		 * 
