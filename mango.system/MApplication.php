@@ -117,7 +117,7 @@
 				try {
 					$this->_defaultNamespace = MApplicationNamespace::parseFromXMLElement($xmlManifest, S("application"));
 				} catch (Exception $e) {
-					throw MParseErrorException(S("resources/manifest.xml"), null, null, $e);
+					throw new MParseErrorException(S("resources/manifest.xml"), null, null, $e);
 				}
 			} else {
 				$this->_delegate = new MApplicationDelegate($this);
@@ -322,34 +322,34 @@
 		 * @return void
 		 */
 		public function run() {
-			$viewController = null;
-			
-			try {
-				if ($this->isRunningFromCommandLine()) {
-					$this->delegate()->didFinishLaunchingFromCommandLineWithArguments($this->commandLineArguments());
-				} else {
+			if ($this->isRunningFromCommandLine()) {
+				die($this->delegate()->didFinishLaunchingFromCommandLineWithArguments($this->commandLineArguments()));
+			} else {
+				$viewController = null;
+				
+				try {
 					$this->delegate()->didFinishLaunching();
 					$viewController = $this->rootViewController();
+				} catch (MBadRequestException $e) {
+					logException($e);
+					$viewController = MObject::newInstanceOfClassWithParameters($this->errorViewControllerClass(), A(
+						MHTTPResponse::RESPONSE_BAD_REQUEST, N(MHTTPResponse::RESPONSE_BAD_REQUEST), S("Bad Request"), $e->description()
+					));
+				} catch (MException $e) {
+					logException($e);
+					$viewController = MObject::newInstanceOfClassWithParameters($this->errorViewControllerClass(), A(
+						MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR, N(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR), S("Internal Server Error"), S("Sorry but the page you are looking for could not be loaded due to an internal server error")
+					));
 				}
-			} catch (MBadRequestException $e) {
-				logException($e);
-				$viewController = MObject::newInstanceOfClassWithParameters($this->errorViewControllerClass(), A(
-					MHTTPResponse::RESPONSE_BAD_REQUEST, N(MHTTPResponse::RESPONSE_BAD_REQUEST), S("Bad Request"), $e->description()
-				));
-			} catch (MException $e) {
-				logException($e);
-				$viewController = MObject::newInstanceOfClassWithParameters($this->errorViewControllerClass(), A(
-					MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR, N(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR), S("Internal Server Error"), S("Sorry but the page you are looking for could not be loaded due to an internal server error")
-				));
+				
+				if (!$viewController) {
+					$viewController = MObject::newInstanceOfClassWithParameters($this->errorViewControllerClass(), A(
+						MHTTPResponse::RESPONSE_NOT_FOUND, N(MHTTPResponse::RESPONSE_NOT_FOUND), S("Not Found"), S("Sorry but the page you are looking for could not be found")
+					));
+				}
+				
+				MSendResponse(new MHTTPViewControllerResponse($viewController));
 			}
-			
-			if (!$viewController) {
-				$viewController = MObject::newInstanceOfClassWithParameters($this->errorViewControllerClass(), A(
-					MHTTPResponse::RESPONSE_NOT_FOUND, N(MHTTPResponse::RESPONSE_NOT_FOUND), S("Not Found"), S("Sorry but the page you are looking for could not be found")
-				));
-			}
-			
-			MSendResponse(new MHTTPViewControllerResponse($viewController));
 		}
 	
 	}

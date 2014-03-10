@@ -72,11 +72,21 @@
 		 * This method is called instead of didFinishLoading when the
 		 * application is run from the command line
 		 *
+		 * The return code should indicate whether the execution was
+		 * successful or not. Return 0 for successful and anything
+		 * else otherwise.
+		 *
+		 * This function should serve a similar function as the main()
+		 * function does in a standard C/C++ application
+		 *
 		 * @param MArray $arguments An array containing the arguments
 		 * passed in from the command line
+		 *
+		 * @return int This function should return a code which indicates
+		 * whether or not the execution was successful
 		 */
 		public function didFinishLaunchingFromCommandLineWithArguments(MArray $arguments) {
-			
+			return 0;
 		}
 		
 		/**
