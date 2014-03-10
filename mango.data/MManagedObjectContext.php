@@ -101,7 +101,7 @@
 		 */
 		private function _parseObjectFromXML(SimpleXMLElement $xmlObject) {
 			$entityName = S($xmlObject->getName());
-			$entity = $this->entityForName($entityName);
+			$entity = $this->persistentStoreCoordinator()->model()->entityWithName($entityName);
 			if ($entity) {
 				$object = $this->newObjectForEntity($entity);
 				if ($object) {
@@ -268,7 +268,7 @@
 		 * specified in $value
 		 *
 		 * @param MEntityDescriptionProperty $property The property whose value you
-		 * wish to match
+		 * wish to match against
 		 * @param MObject $value The value to be matched
 		 *
 		 * @return MManagedObject The fetched MManagedObject
@@ -283,6 +283,24 @@
 			$data = $this->executeFetchRequest($request);
 			
 			return $data->lastObject();
+		}
+		
+		/**
+		 * Returns a Managed Object whose property path matches the specified object
+		 * value
+		 *
+		 * This method fetches an object from the Persistent Store that contains the
+		 * specified property and whose value for that property matches the value
+		 * specified in $value
+		 *
+		 * @param MString $attributePath The attribute path whose value you
+		 * wish to match against
+		 * @param MObject $value The value to be matched
+		 *
+		 * @return MManagedObject The fetched MManagedObject
+		 */
+		public function objectWithAttributePath(MString $attributePath, MObject $value = null) {
+			return $this->objectWith($this->persistentStoreCoordinator()->model()->attributeWithPath($attributePath), $value);
 		}
 		
 		/**
@@ -320,18 +338,6 @@
 		 */
 		public function executeFetchRequest(MFetchRequest $request) {
 			return $this->persistentStoreCoordinator()->executeRequest($request);
-		}
-		
-		/**
-		 * Searches the Managed Object Model attached to this context for an entity with the
-		 * specified name
-		 *
-		 * @param MString $name The name of the entity to find and return
-		 *
-		 * @return MEntityDescription The matching entity
-		 */
-		public function entityForName(MString $entityName) {
-			return $this->persistentStoreCoordinator()->entityForName($entityName);
 		}
 		
 		/**

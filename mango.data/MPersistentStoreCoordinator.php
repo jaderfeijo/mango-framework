@@ -157,24 +157,6 @@
 		/******************** Methods ********************/
 		
 		/**
-		 * Searches the model for an entity with the specified name and returns it
-		 *
-		 * @param MString $entityName The name of the entity you wish to retrieve
-		 * from the model
-		 *
-		 * @return MEntityDescription| The entity matching the specified name or
-		 * null if no entity is found
-		 */
-		public function entityForName(MString $entityName) {
-			foreach ($this->model()->entities()->toArray() as $entity) {
-				if ($entity->name()->equals($entityName)) {
-					return $entity;
-				}
-			}
-			return null;
-		}
-		
-		/**
 		 * Execute a request across all persistent stores and returns the results
 		 * if any
 		 *

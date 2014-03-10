@@ -167,6 +167,13 @@
 		}
 		
 		/**
+		 *
+		 */
+		public function isKindOfClass(MString $class) {
+			return is_a($this, $class->stringValue());
+		}
+		
+		/**
 		 * 
 		 */
 		public function toString() {

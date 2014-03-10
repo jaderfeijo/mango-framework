@@ -245,6 +245,30 @@
 		}
 		
 		/**
+		 * Returns an instance of MEntityDescriptionAttribute matching
+		 * the specified path
+		 *
+		 * The path is a string which should be in the following format
+		 *
+		 * "EntityName.attributeName"
+		 *
+		 * @param MString $path The path of the attribute you wish to retrieve
+		 *
+		 * @return MEntityDescriptionAttribute The attribute matching the specified
+		 * path, or null if no matching attribute is found
+		 */
+		public function attributeWithPath(MString $path) {
+			$pathArray = $path->componentsSeparatedByString(S("."));
+			if ($pathArray->count() == 2) {
+				$entityName = $pathArray->objectAtIndex(0);
+				$attributeName = $pathArray->objectAtIndex(1);
+				return $this->entityWithName($entityName)->attributeWithName($attributeName);
+			} else {
+				return null;
+			}
+		}
+		
+		/**
 		 * Returns a new instance of MManagedObjectModel this instance's model file and the
 		 * the specified version
 		 *
