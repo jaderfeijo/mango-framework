@@ -61,6 +61,10 @@
 			$this->_application = $application;
 		}
 		
+		public function application() {
+			return $this->_application;
+		}
+		
 		/**
 		 * Called when the application is being run from the command
 		 * line

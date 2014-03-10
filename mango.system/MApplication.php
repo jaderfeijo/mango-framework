@@ -112,7 +112,7 @@
 				$this->_delegate = MObject::newInstanceOfClass($delegateClass);
 			} else if (MFile::fileExists("resources/manifest.xml")) {
 				$xmlManifest = simplexml_load_file("resources/manifest.xml");
-				$this->_delegate = MObject::newInstanceOfClass(S($xmlManifest['delegate']));
+				$this->_delegate = MObject::newInstanceOfClassWithParameters(S($xmlManifest['delegate']), A($this));
 				$this->_errorViewControllerClass = S($xmlManifest['errorClass']);
 				try {
 					$this->_defaultNamespace = MApplicationNamespace::parseFromXMLElement($xmlManifest, S("application"));
@@ -120,7 +120,7 @@
 					throw MParseErrorException(S("resources/manifest.xml"), null, null, $e);
 				}
 			} else {
-				$this->_delegate = new MApplicationDelegate();
+				$this->_delegate = new MApplicationDelegate($this);
 			}
 			
 			MApplication::$_application = $this;
