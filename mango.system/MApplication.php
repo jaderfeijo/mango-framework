@@ -53,7 +53,7 @@
 	 */
 	class MApplication extends MObject {
 		
-		protected static $application;
+		protected static $_application;
 		
 		/**
 		 * Returns the MApplication instance that represents the currently
@@ -62,20 +62,22 @@
 		 * @return MApplication The currently running Application instance
 		 */
 		public static function sharedApplication() {
-			if (!MApplication::$application) {
-				MApplication::$application = new MApplication();
+			if (!MApplication::$_application) {
+				MApplication::$_application = new MApplication();
 			}
-			return MApplication::$application;
+			return MApplication::$_application;
 		}
 		
 		//
 		// ************************************************************
 		//
 		
-		protected $delegate;
-		protected $errorViewControllerClass;
-		protected $defaultNamespace;
-		protected $rootViewController;
+		protected $_delegate;
+		protected $_errorViewControllerClass;
+		protected $_defaultNamespace;
+		protected $_rootViewController;
+		protected $_commandName;
+		protected $_commandLineArguments;
 		
 		/**
 		 * Creates a new MApplication instance with the specified delegate class
@@ -90,10 +92,12 @@
 		public function __construct(MString $delegateClass = null) {
 			parent::__construct();
 			
-			$this->delegate = null;
-			$this->errorViewControllerClass = null;
-			$this->defaultNamespace = null;
-			$this->rootViewController = null;
+			$this->_delegate = null;
+			$this->_errorViewControllerClass = null;
+			$this->_defaultNamespace = null;
+			$this->_rootViewController = null;
+			$this->_commandName = null;
+			$this->_commandLineArguments = null;
 			
 			if (!$this->isRoutingEnabled()) {
 				$this->enableRouting();
@@ -105,21 +109,21 @@
 			}
 			
 			if ($delegateClass) {
-				$this->delegate = MObject::newInstanceOfClass($delegateClass);
+				$this->_delegate = MObject::newInstanceOfClass($delegateClass);
 			} else if (MFile::fileExists("resources/manifest.xml")) {
 				$xmlManifest = simplexml_load_file("resources/manifest.xml");
-				$this->delegate = MObject::newInstanceOfClass(S($xmlManifest['delegate']));
-				$this->errorViewControllerClass = S($xmlManifest['errorClass']);
+				$this->_delegate = MObject::newInstanceOfClass(S($xmlManifest['delegate']));
+				$this->_errorViewControllerClass = S($xmlManifest['errorClass']);
 				try {
-					$this->defaultNamespace = MApplicationNamespace::parseFromXMLElement($xmlManifest, S("application"));
+					$this->_defaultNamespace = MApplicationNamespace::parseFromXMLElement($xmlManifest, S("application"));
 				} catch (Exception $e) {
 					throw MParseErrorException(S("resources/manifest.xml"), null, null, $e);
 				}
 			} else {
-				$this->delegate = new MApplicationDelegate();
+				$this->_delegate = new MApplicationDelegate();
 			}
 			
-			MApplication::$application = $this;
+			MApplication::$_application = $this;
 		}
 		
 		/******************** Protected ********************/
@@ -154,6 +158,27 @@
 			MLog("[EnableRouting]: File created");
 		}
 		
+		/**
+		 * @internal
+		 *
+		 * @return void
+		 */
+		protected function parseCommandLineArguments() {
+			if ($this->isRunningFromCommandLine()) {
+				$command = null;
+				$arguments = new MMutableArray();
+				foreach ($argv as $argument) {
+					if (is_null($command)) {
+						$command = S($argument);
+					} else {
+						$arguments->addObject(S($argument));
+					}
+				}
+				$this->_commandName = $command;
+				$this->_commandLineArguments = $arguments;
+			}
+		}
+		
 		/******************** Properties ********************/
 		
 		/**
@@ -163,7 +188,7 @@
 		 * application
 		 */
 		public function delegate() {
-			return $this->delegate;
+			return $this->_delegate;
 		}
 		
 		/**
@@ -181,7 +206,7 @@
 		 * @return void
 		 */
 		public function setErrorViewControllerClass(MString $errorViewControllerClass = null) {
-			$this->errorViewControllerClass = $errorViewControllerClass;
+			$this->_errorViewControllerClass = $errorViewControllerClass;
 		}
 		
 		/**
@@ -192,9 +217,9 @@
 		 * class name
 		 */
 		public function errorViewControllerClass() {
-			if ($this->errorViewControllerClass) {
-				if (!$this->errorViewControllerClass->isEmpty()) {
-					return $this->errorViewControllerClass;
+			if ($this->_errorViewControllerClass) {
+				if (!$this->_errorViewControllerClass->isEmpty()) {
+					return $this->_errorViewControllerClass;
 				}
 			}
 			return S("mango.system.MErrorViewController");
@@ -206,10 +231,10 @@
 		 * @return MApplicationNamespace The default namespace used by this application
 		 */
 		public function defaultNamespace() {
-			if (!$this->defaultNamespace) {
-				$this->defaultNamespace = new MApplicationNamespace(S(""));
+			if (!$this->_defaultNamespace) {
+				$this->_defaultNamespace = new MApplicationNamespace(S(""));
 			}
-			return $this->defaultNamespace;
+			return $this->_defaultNamespace;
 		}
 		
 		/**
@@ -223,13 +248,57 @@
 		 * @return MViewController The root view controller for this instance of the application
 		 */
 		protected function rootViewController() {
-			if (!$this->rootViewController) {
-				$this->rootViewController = $this->defaultNamespace()->viewControllerForPath(MHTTPRequest()->arguments());
+			if (!$this->_rootViewController) {
+				$this->_rootViewController = $this->defaultNamespace()->viewControllerForPath(MHTTPRequest()->arguments());
 			}
-			return $this->rootViewController;
+			return $this->_rootViewController;
 		}
 		
 		/******************** Methods ********************/
+		
+		/**
+		 * Returns a boolean which indicates whether or not this application was called from
+		 * the command line, or whether it is being run as a result of a request to the
+		 * server.
+		 *
+		 * @return bool Returns true if the application is being run from the command line.
+		 * false otherwise.
+		 */
+		public function isRunningFromCommandLine() {
+			if (PHP_SAPI == 'cli') {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		/**
+		 * Returns a string containing the command name that was used to invoke this
+		 * application from the command line.
+		 *
+		 * @return MString A string containing the command name used to invoke this
+		 * application from the command line.
+		 */
+		public function commandName() {
+			if (!$this->_commandName) {
+				$this->parseCommandLineArguments();
+			}
+			return $this->_commandName;
+		}
+		
+		/**
+		 * Returns an array containing all the arguments that were passed to this mango
+		 * application when it was invoked from the command line.
+		 *
+		 * @return MArray An array containing the arguments that were passed in from the
+		 * command line.
+		 */
+		public function commandLineArguments() {
+			if (!$this->_commandLineArguments) {
+				$this->parseCommandLineArguments();
+			}
+			return $this->_commandLineArguments;
+		}
 		
 		/**
 		 * This function needs to be called after creating your instance of MApplication.
@@ -256,8 +325,12 @@
 			$viewController = null;
 			
 			try {
-				$this->delegate->applicationDidLoad();
-				$viewController = $this->rootViewController();
+				if ($this->isRunningFromCommandLine()) {
+					$this->delegate()->didFinishLaunchingFromCommandLineWithArguments($this->commandLineArguments());
+				} else {
+					$this->delegate()->didFinishLaunching();
+					$viewController = $this->rootViewController();
+				}
 			} catch (MBadRequestException $e) {
 				logException($e);
 				$viewController = MObject::newInstanceOfClassWithParameters($this->errorViewControllerClass(), A(

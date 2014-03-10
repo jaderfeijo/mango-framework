@@ -46,8 +46,37 @@
 		
 		/******************** Class Methods ********************/
 		
+		protected $_application;
+		
 		/**
-		 * Called once the application has just finished loading,
+		 * Initialises a new instance of MApplicationDelegate for the
+		 * specified MApplication
+		 *
+		 * @param MApplication $application The MApplication instance
+		 * this delegate represents
+		 *
+		 * @return MApplicationDelegate The application delegate instance
+		 */
+		public function __construct(MApplication $application) {
+			$this->_application = $application;
+		}
+		
+		/**
+		 * Called when the application is being run from the command
+		 * line
+		 *
+		 * This method is called instead of didFinishLoading when the
+		 * application is run from the command line
+		 *
+		 * @param MArray $arguments An array containing the arguments
+		 * passed in from the command line
+		 */
+		public function didFinishLaunchingFromCommandLineWithArguments(MArray $arguments) {
+			
+		}
+		
+		/**
+		 * Called once the application has just finished launching,
 		 * before the control is passed on to the view controller
 		 *
 		 * This method gives you the first opportunity to configure your
@@ -56,7 +85,7 @@
 		 *
 		 * @return void
 		 */
-		public function applicationDidLoad() {
+		public function didFinishLaunching() {
 			
 		}
 		
