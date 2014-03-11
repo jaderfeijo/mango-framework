@@ -164,6 +164,7 @@
 		 * @return void
 		 */
 		protected function parseCommandLineArguments() {
+			global $argv;
 			if ($this->isRunningFromCommandLine()) {
 				$command = null;
 				$arguments = new MMutableArray();
