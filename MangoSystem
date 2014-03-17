@@ -82,9 +82,13 @@
 			if (!MAppDelegate()->didRecoverFromError($level, $message, $file, $line, $context)) {
 				logError($level, $message, $file, $line);
 				
-				$response = new MHTTPViewControllerResponse(new MErrorViewController(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR, N(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR), S("Internal Server Error"), S("Sorry but the page you are looking for could not be loaded due to an internal server error")));
-				$response->setCode(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR);
-				MDie($response);
+				if (!isRunningFromCommandLine()) {
+					$response = new MHTTPViewControllerResponse(new MErrorViewController(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR, N(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR), S("Internal Server Error"), S("Sorry but the page you are looking for could not be loaded due to an internal server error")));
+					$response->setCode(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR);
+					MDie($response);
+				} else {
+					MDie(null, 1);
+				}
 			}
 		}
 		return true;
@@ -106,9 +110,13 @@
 		if (!MAppDelegate()->didRecoverFromUncaughtException($exception)) {
 			logException($exception);
 			
-			$response = new MHTTPViewControllerResponse(new MErrorViewController(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR, N(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR), S("Internal Server Error"), S("Sorry but the page you are looking for could not be loaded due to an internal server error")));
-			$response->setCode(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR);
-			MDie($response);
+			if (!isRunningFromCommandLine()) {
+				$response = new MHTTPViewControllerResponse(new MErrorViewController(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR, N(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR), S("Internal Server Error"), S("Sorry but the page you are looking for could not be loaded due to an internal server error")));
+				$response->setCode(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR);
+				MDie($response);
+			} else {
+				MDie(null, 1);
+			}
 		}
 	}
 	
@@ -280,6 +288,23 @@
 			$message = $e->message();
 		}
 		logError(E_USER_ERROR, $message, $file, $line, $backTrace);
+	}
+	
+	/**
+	 * @internal
+	 *
+	 * Returns a boolean indicating whether or not this application
+	 * was invoked from the command line.
+	 *
+	 * @return bool true if this application is running from the command
+	 * line, false otherwise.
+	 */
+	function isRunningFromCommandLine() {
+		if (PHP_SAPI == 'cli') {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 ?>

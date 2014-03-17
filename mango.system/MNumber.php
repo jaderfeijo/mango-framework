@@ -51,12 +51,12 @@
 		 *
 		 * @return MNumber
 		 */
-		public static function parseNumber($number) {
+		public static function parse($number) {
 			$num = $number;
 			if ($number instanceof MString) {
 				$num = (string)$number;
 			}
-		
+			
 			if (is_numeric($num)) {
 				if (is_float($num)) {
 					return MNumber::parseFloat($num);
@@ -207,9 +207,8 @@
 		 *
 		 * @return bool
 		 */
-		public function isGreaterThan($number) {
-			if (!is_numeric($number)) throw new MNaNException($number);
-			return ($this->value() > $number);
+		public function isGreaterThan(MNumber $number) {
+			return ($this->value() > $number->value());
 		}
 		
 		/**
@@ -217,9 +216,8 @@
 		 *
 		 * @return bool
 		 */
-		public function isLessThan($number) {
-			if (!is_numeric($number)) throw new MNaNException($number);
-			return ($this->value() < $number);
+		public function isLessThan(MNumber $number) {
+			return ($this->value() < $number->value());
 		}
 		
 		/**
@@ -227,9 +225,8 @@
 		 *
 		 * @return bool
 		 */
-		public function isGreaterThanOrEqualTo($number) {
-			if (!is_numeric($number)) throw new MNaNException($number);
-			return ($this->value() >= $number);
+		public function isGreaterThanOrEqualTo(MNumber $number) {
+			return ($this->value() >= $number->value());
 		}
 		
 		/**
@@ -238,8 +235,7 @@
 		 * @return bool
 		 */
 		public function isLessThanOrEqualTo($number) {
-			if (!is_numeric($number)) throw new MNaNException($number);
-			return ($this->value() <= $number);
+			return ($this->value() <= $number->value());
 		}
 		
 		/**
@@ -247,9 +243,7 @@
 		 *
 		 * @return bool
 		 */
-		public function isWithinBounds($lowerBound, $upperBound) {
-			if (!is_numeric($lowerBound)) throw new MNaNException($lowerBound);
-			if (!is_numeric($upperBound)) throw new MNaNException($upperBound);
+		public function isWithinBounds(MNumber $lowerBound, MNumber $upperBound) {
 			return ($this->isGreaterThanOrEqualTo($lowerBound) && $this->isLessThanOrEqualTo($upperBound));
 		}
 		
@@ -258,9 +252,8 @@
 		 *
 		 * @return MNumber
 		 */
-		public function numberBySumming($number) {
-			if (!is_numeric($number)) throw new MNaNException($number);
-			return new MNumber($this->value() + $number);
+		public function numberBySumming(MNumber $number) {
+			return new MNumber($this->value() + $number->value());
 		}
 		
 		/**

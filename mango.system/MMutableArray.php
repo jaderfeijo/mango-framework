@@ -109,7 +109,7 @@
 		 */
 		public function removeObjectAtIndex($index) {
 			MAssertTypes('int', $index);
-			if (N($index)->isWithinBounds($this->lowerBound(), $this->upperBound())) {
+			if (N($index)->isWithinBounds(N($this->lowerBound()), N($this->upperBound()))) {
 				array_splice($this->array, $index, 1);
 			} else {
 				throw new MIndexOutOfBoundsException($index, $this->lowerBound(), $this->upperBound());

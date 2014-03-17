@@ -166,6 +166,21 @@
 			return false;
 		}
 		
+		/**
+		 * Called just before the application is about to return it's results to the client
+		 * (or return code when running from the CLI) and be terminated.
+		 *
+		 * @param MHTTPResponse $response The response object that will be retunred to the
+		 * client. This value is null when running from the command line
+		 * @param int $returnCode The return code that will be returned to the system, this
+		 * value is usually used when running from the command line
+		 *
+		 * @return void
+		 */
+		public function willTerminateWithResponse(MHTTPResonse $response = null, $returnCode) {
+			
+		}
+		
 	}
 
 ?>

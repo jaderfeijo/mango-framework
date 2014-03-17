@@ -99,7 +99,7 @@
 		/**
 		 * @return MManagedObject
 		 */
-		private function _parseObjectFromXML(SimpleXMLElement $xmlObject) {
+		private function _parseObjectFromXML(SimpleXMLElement $xmlObject, callable $callback = null) {
 			$entityName = S($xmlObject->getName());
 			$entity = $this->persistentStoreCoordinator()->model()->entityWithName($entityName);
 			if ($entity) {
@@ -131,6 +131,8 @@
 							throw new MManagedObjectException($object, Sf("Attribute type '%s' not supported", $attribute->className()));
 						}
 					}
+					
+					if (!is_null($callback)) $callback($object);
 					
 					return $object;
 				} else {
@@ -187,14 +189,17 @@
 		 * and inserts them into this Managed Object Context
 		 *
 		 * @param MFile $file An XML file containing the objects to be parsed
+		 * @param callable $callback A callback function which will be called every time a new
+		 * object is parsed and added into the Managed Object Context. The method signature for the
+		 * callback is callback(MManagedObject $object);
 		 *
 		 * @return MArray An Array containing the parsed objects
 		 */
-		public function parseObjectsFromFile(MFile $file) {
+		public function parseObjectsFromFile(MFile $file, callable $callback = null) {
 			if (!$file->exists()) throw new MFileNotFoundException($file->path());
 			
 			$xml = simplexml_load_file($file->path()->stringValue());
-			return $this->parseObjectsFromXML($xml);
+			return $this->parseObjectsFromXML($xml, $callback);
 		}
 		
 		/**
@@ -202,12 +207,16 @@
 		 * and inserts them into this Managed Object Context
 		 *
 		 * @param MData $data A data object containing the XML representation of the objects to be parsed
+		 * @param callable $callback A callback function which will be called every time a new
+		 * object is parsed and added into the Managed Object Context. The method signature for the
+		 * callback is callback(MManagedObject $object);
+		 *
 		 *
 		 * @return MArray An Array containing the parsed objects
 		 */
-		public function parseObjectsFromData(MData $data) {
+		public function parseObjectsFromData(MData $data, callable $callback = null) {
 			$xml = simplexml_load_string($data->getBytes());
-			return $this->parseObjectsFromXML($xml);
+			return $this->parseObjectsFromXML($xml, $callback);
 		}
 		
 		/**
@@ -215,12 +224,15 @@
 		 * and inserts them into this Managed Object Context
 		 *
 		 * @param MString $string A string containing the XML representation of the objects to be parsed
+		 * @param callable $callback A callback function which will be called every time a new
+		 * object is parsed and added into the Managed Object Context. The method signature for the
+		 * callback is callback(MManagedObject $object);
 		 *
 		 * @return MArray An Array containing the parsed objects
 		 */
-		public function parseObjectsFromString(MString $string) {
+		public function parseObjectsFromString(MString $string, callable $callback = null) {
 			$xml = simplexml_load_string($string->stringValue());
-			return $this->parseObjectsFromXML($xml);
+			return $this->parseObjectsFromXML($xml, $callback);
 		}
 		
 		/**
@@ -228,13 +240,16 @@
 		 * and inserts them into this Managed Object Context
 		 *
 		 * @param SimpleXMLElement $xml A SimpleXMLElement object containing the objects to be parsed
+		 * @param callable $callback A callback function which will be called every time a new
+		 * object is parsed and added into the Managed Object Context. The method signature for the
+		 * callback is callback(MManagedObject $object);
 		 *
 		 * @return MArray An Array containing the parsed objects
 		 */
-		public function parseObjectsFromXML(SimpleXMLElement $xml) {
+		public function parseObjectsFromXML(SimpleXMLElement $xml, callable $callback = null) {
 			$objects = new MMutableArray();
 			foreach ($xml->children() as $xmlObject) {
-				$objects->addObject($this->_parseObjectFromXML($xmlObject));
+				$objects->addObject($this->_parseObjectFromXML($xmlObject, $callback));
 			}
 			return $objects;
 		}
@@ -310,6 +325,9 @@
 		 * inserts it into this context and returns it.
 		 *
 		 * @param MEntityDescription $entity The entity to create a new instance of
+		 * @param int $objectID An optional ID to use for the object. This should only
+		 * be used when manullay constructing a representation of the object from the
+		 * data store.
 		 *
 		 * @return MManagedObject The new MManagedObject subclass instance
 		 */
@@ -317,7 +335,7 @@
 			MAssertTypes('int', $objectID);
 			return MObject::newInstanceOfClassWithParameters(
 				$entity->entityClassName(),
-				A(array($this, $objectID))
+				A(array($entity, $this, $objectID))
 			);
 		}
 		

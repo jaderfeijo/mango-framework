@@ -112,7 +112,7 @@
 		protected function connection() {
 			if ($this->connection == null) {
 				$this->connection = new PDO(
-					$this->url(),
+					$this->url()->stringValue(),
 					$this->username()->stringValue(),
 					$this->password()->stringValue(),
 					array(PDO::ATTR_PERSISTENT => true)

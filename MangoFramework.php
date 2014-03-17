@@ -332,7 +332,7 @@
 	 * @return MNumber Returns the boxed number
 	 */
 	function N($number) {
-		return MNumber::parseNumber($number);
+		return MNumber::parse($number);
 	}
 	
 	/**
@@ -432,7 +432,7 @@
 		return new MRange($location, $length);
 	}
 	
-	/******************** Asserting Data Types ********************/
+	/******************** Asserting Data Types & Values ********************/
 	
 	/**
 	 * Asserts weather a variable or set of variables are of a certain type
@@ -475,6 +475,7 @@
 	 * @return void
 	 */
 	function MAssertTypes() {
+		import('mango.system.exceptions.MInvalidDataTypeException');	
 		$args = func_get_args();
 		for ($i = 0; $i < count($args); $i++) {
 			$type = $args[$i];
@@ -529,6 +530,26 @@
 		}
 	}
 	
+	/**
+	 * Asserts if a number is within a certain range
+	 *
+	 * This function asserts that the specified number is smaller than
+	 * max and greater than min. If it is not, this function throws
+	 * an MNumberOutOfRangeException 
+	 * 
+	 * @param MNumber $number The number to assert
+	 * @param MNumber $min The minimum value for the number
+	 * @param MNumber $max The maximum value for the number
+	 *
+	 * @return void
+	 */
+	function MAssertRange(MNumber $number, MNumber $min, MNumber $max) {
+		if (!$number->isWithinBounds($min, $max)) {
+			import('mango.system.exceptions.MNumberOutOfRangeException');
+			throw new MNumberOutOfRangeException($number, $min, $max);
+		}
+	}
+	
 	/******************** Writing to the System Log ********************/
 	
 	/**
@@ -551,6 +572,10 @@
 		$args = func_get_args();
 		$str = call_user_func_array("Sf", $args);
 		error_log($str);
+	}
+	
+	function MLogStackTrace() {
+		logBackTrace();
 	}
 	
 	/**
@@ -584,9 +609,16 @@
 	 *
 	 * @return void
 	 */
-	function MDie(MHTTPResponse $response) {
-		MSendResponse($response);
-		die();
+	function MDie(MHTTPResponse $response = null, $returnCode = 0) {
+		MAssertTypes('int', $returnCode);
+		
+		MAppDelegate()->willTerminateWithResponse($response, $returnCode);
+		
+		if (!is_null($response)) {
+			MSendResponse($response);
+		}
+		
+		die($returnCode);
 	}
 	
 	/******************** Getting the Application Object & Delegate ********************/

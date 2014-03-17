@@ -266,11 +266,7 @@
 		 * false otherwise.
 		 */
 		public function isRunningFromCommandLine() {
-			if (PHP_SAPI == 'cli') {
-				return true;
-			} else {
-				return false;
-			}
+			return isRunningFromCommandLine();
 		}
 		
 		/**
@@ -323,8 +319,11 @@
 		 * @return void
 		 */
 		public function run() {
+			$response = null;
+			$returnCode = 0;
+			
 			if ($this->isRunningFromCommandLine()) {
-				die($this->delegate()->didFinishLaunchingFromCommandLineWithArguments($this->commandLineArguments()));
+				$returnCode = $this->delegate()->didFinishLaunchingFromCommandLineWithArguments($this->commandLineArguments());
 			} else {
 				$viewController = null;
 				
@@ -349,8 +348,10 @@
 					));
 				}
 				
-				MSendResponse(new MHTTPViewControllerResponse($viewController));
+				$response = new MHTTPViewControllerResponse($viewController);
 			}
+			
+			MDie($response, $returnCode);
 		}
 	
 	}
