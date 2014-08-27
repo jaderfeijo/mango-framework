@@ -395,8 +395,10 @@
 						$contentTypes = MHTTPRequest()->contentType()->componentsSeparatedByString(S(";"));
 						foreach ($contentTypes->toArray() as $contentType) {
 							$type = $contentType->stringByTrimmingEmptySpaces();
-							if (!$this->applicationController()->acceptedMethodForMethod(S(MHTTPRequest()->method()))->contentTypes()->containsObject($type)) {
-								throw new MBadRequestException(Sf("The specified content-type (%s) is not supported", $type));
+							if ($this->applicationController()->acceptedMethodForMethod(S(MHTTPRequest()->method()))->contentTypes()->count() > 0) {
+								if (!$this->applicationController()->acceptedMethodForMethod(S(MHTTPRequest()->method()))->contentTypes()->containsObject($type)) {
+									throw new MBadRequestException(Sf("The specified content-type (%s) is not supported", $type));
+								}
 							}
 						}
 					}
