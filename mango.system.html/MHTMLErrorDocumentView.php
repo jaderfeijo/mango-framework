@@ -88,7 +88,7 @@
 		 * @return void
 		 */
 		protected function updateView() {
-			$this->setTitle(Sf("%s - %s", $this->errorCode()->toString(), $this->errorName()));
+			$this->title()->setText(Sf("%s - %s", $this->errorCode()->toString(), $this->errorName()));
 			$this->errorCodeHeaderView->setText($this->errorCode()->toString());
 			$this->errorDescriptionParagraphView->setText($this->errorMessage());
 		}
