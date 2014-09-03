@@ -407,12 +407,12 @@
 						if (!$this->authenticatedUserName) {
 							$authenticateHeader = Sf('Digest realm="%s", qop="auth", nonce="%s", opaque="%s"', $this->realm(), uniqid(), md5($this->realm()));
 							
-							if (empty($_SERVER['PHP_AUTH_DIGEST'])) {
+							if (empty(MHTTPRequest::request()->server()['PHP_AUTH_DIGEST'])) {
 								$this->setResponseCode(MHTTPResponse::RESPONSE_UNAUTHORIZED);
 								$this->addResponseHeader(S("WWW-Authenticate"), $authenticateHeader);
 								return $this->accessDeniedView();
 							} else {
-								$data = $this->_parseDigest($_SERVER['PHP_AUTH_DIGEST']);
+								$data = $this->_parseDigest(MHTTPRequest::request()->server()['PHP_AUTH_DIGEST']);
 								
 								$username = $data->objectForKey(S("username"));
 								if ($username) {
@@ -426,7 +426,7 @@
 										)));
 										$A2 = S(md5(Sf(
 											"%s:%s",
-											$_SERVER['REQUEST_METHOD'],
+											MHTTPRequest::request()->server()['REQUEST_METHOD'],
 											$data->objectForKey(S("uri"))
 										)));
 										$validResponse = S(md5(Sf(

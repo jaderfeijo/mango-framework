@@ -51,6 +51,7 @@
 		protected $properties;
 		protected $indentsCode;
 		protected $indentLevel;
+		protected $shouldAppendEmptyLine;
 		
 		/**
 		 * 
@@ -65,6 +66,7 @@
 			$this->properties = new MMutableDictionary();
 			$this->indentsCode = true;
 			$this->indentLevel = 0;
+			$this->shouldAppendEmptyLine = false;
 		}
 		
 		/******************** Properties ********************/
@@ -168,6 +170,21 @@
 			}
 		}
 		
+		/**
+		 * @return bool
+		 */
+		public function shouldAppendEmptyLine() {
+			return $this->shouldAppendEmptyLine;
+		}
+		
+		/**
+		 * @return void
+		 */
+		public function setShouldAppendEmptyLine($shouldAppendEmptyLine) {
+			MAssertTypes('bool', $shouldAppendEmptyLine);
+			$this->shouldAppendEmptyLine = $shouldAppendEmptyLine;
+		}
+		
 		/******************** Methods ********************/
 		
 		/**
@@ -219,6 +236,10 @@
 					$markup->appendString(Sf("%s</%s>", $indentString, $this->element()));
 				} else {
 					$markup->appendString(S("/>"));
+				}
+				
+				if ($this->shouldAppendEmptyLine()) {
+					$markup->appendLine();
 				}
 				
 				return $markup;
