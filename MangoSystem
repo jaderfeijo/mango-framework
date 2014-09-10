@@ -348,5 +348,25 @@
 		}
 		return null;
 	}
+	
+	/**
+	 * @internal
+	 *
+	 * Returns the name of the request that should be used
+	 *
+	 * @see isRunningInSimulaterRequestMode()
+	 * @see "--simulate-request"
+	 *
+	 * @return string The name of the request that should be used
+	 */
+	function simulatedRequestName() {
+		global $argv;
+		if (isRunningFromCommandLine() && isRunningInSimulatedRequestMode()) {
+			if (isset($argv[3])) {
+				return $argv[3];
+			}
+		}
+		return null;
+	}
 
 ?>

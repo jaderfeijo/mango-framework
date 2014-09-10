@@ -63,7 +63,7 @@
 		public static function request() {
 			if (!MHTTPRequest::$request) {
 				if (isRunningInSimulatedRequestMode()) {
-					MHTTPRequest::$request = new MHTTPRequest(simulatedRequestFileName());
+					MHTTPRequest::$request = new MHTTPRequest(simulatedRequestFileName(), simulatedRequestName());
 				} else {
 					MHTTPRequest::$request = new MHTTPRequest();
 				}
@@ -96,7 +96,7 @@
 		 *
 		 * @return MHTTPRequest
 		 */
-		public function __construct($simulatedRequestFile = null) {
+		public function __construct($simulatedRequestFile = null, $simulatedRequestName = null) {
 			parent::__construct();
 			
 			$this->method = null;
@@ -113,10 +113,19 @@
 			if ($simulatedRequestFile) {
 				if (file_exists($simulatedRequestFile)) {
 					$json = json_decode(file_get_contents($simulatedRequestFile), true);
-					$this->server = array_merge($_SERVER, $json['server']);
-					$this->get = array_merge($_GET, $json['get']);
-					$this->post = array_merge($_POST, $json['post']);
-					$this->contentsFile = $json['contents-file'];
+					if (!empty($simulatedRequestName)) {
+						$request = $json[$simulatedRequestName];
+						if (!empty($request)) {
+							$this->server = array_merge($_SERVER, $json[$simulatedRequestName]['server']);
+							$this->get = array_merge($_GET, $json[$simulatedRequestName]['get']);
+							$this->post = array_merge($_POST, $json[$simulatedRequestName]['post']);
+							$this->contentsFile = $json[$simulatedRequestName]['contents-file'];
+						} else {
+							throw new Exception(Sf("Could not find request named '%s' inside '%s'", $simulatedRequestName, $simulatedRequestFile));
+						}
+					} else {
+						throw new MException(S("You must specify a 'request_name'. Usage: hhvm -m index.php --simulated-request [json_request_file] [request_name]"));
+					}
 				} else {
 					throw new MFileNotFoundException(S($simulatedRequestFile));
 				}
