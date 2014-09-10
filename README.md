@@ -38,7 +38,7 @@ If you find this software useful please don't forget to donate!
 
 Bitcoin: `14j8rsDX238cxTgcW9EBDFK6eY43WA2P9V`
 
-PayPal: jader.feijo@gmail.com"
+PayPal: jader.feijo@gmail.com
 
 Thank you for using Mango Framework!
 
