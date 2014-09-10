@@ -30,6 +30,8 @@
 	
 	package('mango.system');
 	
+	import('mango.system.exceptions');
+	
 	/**
 	 * 
 	 *
@@ -60,7 +62,11 @@
 		 */
 		public static function request() {
 			if (!MHTTPRequest::$request) {
-				MHTTPRequest::$request = new MHTTPRequest();
+				if (isRunningInSimulatedRequestMode()) {
+					MHTTPRequest::$request = new MHTTPRequest(simulatedRequestFileName(), simulatedRequestName());
+				} else {
+					MHTTPRequest::$request = new MHTTPRequest();
+				}
 			}
 			return MHTTPRequest::$request;
 		}
@@ -79,13 +85,18 @@
 		protected $relativeAddress;
 		protected $baseUrl;
 		protected $url;
+		protected $server;
+		protected $get;
+		protected $post;
+		
+		protected $contentsFile;
 		
 		/**
 		 * @internal
 		 *
 		 * @return MHTTPRequest
 		 */
-		public function __construct() {
+		public function __construct($simulatedRequestFile = null, $simulatedRequestName = null) {
 			parent::__construct();
 			
 			$this->method = null;
@@ -98,9 +109,56 @@
 			$this->relativeAddress = null;
 			$this->baseUrl = null;
 			$this->url = null;
+			
+			if ($simulatedRequestFile) {
+				if (file_exists($simulatedRequestFile)) {
+					$json = json_decode(file_get_contents($simulatedRequestFile), true);
+					if (!empty($simulatedRequestName)) {
+						$request = $json[$simulatedRequestName];
+						if (!empty($request)) {
+							$this->server = array_merge($_SERVER, $json[$simulatedRequestName]['server']);
+							$this->get = array_merge($_GET, $json[$simulatedRequestName]['get']);
+							$this->post = array_merge($_POST, $json[$simulatedRequestName]['post']);
+							$this->contentsFile = $json[$simulatedRequestName]['contents-file'];
+						} else {
+							throw new Exception(Sf("Could not find request named '%s' inside '%s'", $simulatedRequestName, $simulatedRequestFile));
+						}
+					} else {
+						throw new MException(S("You must specify a 'request_name'. Usage: hhvm -m index.php --simulated-request [json_request_file] [request_name]"));
+					}
+				} else {
+					throw new MFileNotFoundException(S($simulatedRequestFile));
+				}
+			} else {
+				$this->server = $_SERVER;
+				$this->get = $_GET;
+				$this->post = $_POST;
+				$this->contentsFile = "php://input";
+			}
 		}
 		
 		/******************** Properties ********************/
+		
+		/**
+		 * @return array
+		 */
+		public function server() {
+			return $this->server;
+		}
+		
+		/**
+		 * @return array
+		 */
+		public function get() {
+			return $this->get;
+		}
+		
+		/**
+		 * @return array
+		 */
+		public function post() {
+			return $this->post;
+		}
 		
 		/**
 		 * 
@@ -109,7 +167,7 @@
 		 */
 		public function method() {
 			if (!$this->method) {
-				$this->method = $_SERVER['REQUEST_METHOD'];
+				$this->method = $this->server()['REQUEST_METHOD'];
 			}
 			return $this->method;
 		}
@@ -119,8 +177,8 @@
 		 */
 		public function contentType() {
 			if (!$this->contentType) {
-				if (isset($_SERVER['CONTENT_TYPE'])) {
-					$this->contentType = S($_SERVER['CONTENT_TYPE']);
+				if (isset($this->server()['CONTENT_TYPE'])) {
+					$this->contentType = S($this->server()['CONTENT_TYPE']);
 				}
 			}
 			return $this->contentType;
@@ -131,7 +189,7 @@
 		 */
 		public function contents() {
 			if (!$this->contents) {
-				$this->contents = new MData(file_get_contents("php://input"));
+				$this->contents = new MData(file_get_contents($this->contentsFile));
 			}
 			return $this->contents;
 		}
@@ -142,7 +200,7 @@
 		public function inputParameters() {
 			if (!$this->inputParameters) {
 				$this->inputParameters = new MMutableDictionary();
-				$data = $_GET;
+				$data = $this->get();
 				foreach ($data as $key => $value) {
 					$this->inputParameters->setObjectForKey(S($key), $value);
 				}
@@ -158,7 +216,7 @@
 		public function inputFields() {
 			if (!$this->inputFields) {
 				$this->inputFields = new MMutableDictionary();
-				$data = $_POST;
+				$data = $this->post();
 				if (!$data) {
 					$data = array();
 					parse_str($this->contents()->getBytes(), $data);
@@ -194,7 +252,7 @@
 		 */
 		public function baseAddress() {
 			if (!$this->baseAddress) {
-				$this->baseAddress = S($_SERVER['SCRIPT_NAME'])->stringByReplacingOccurrencesOfString(S("index.php"), S(""))->stringByTrimmingCharactersInSet(S("/"));
+				$this->baseAddress = S($this->server()['SCRIPT_NAME'])->stringByReplacingOccurrencesOfString(S("index.php"), S(""))->stringByTrimmingCharactersInSet(S("/"));
 			}
 			return $this->baseAddress;
 		}
@@ -206,7 +264,7 @@
 		 */
 		public function relativeAddress() {
 			if (!$this->relativeAddress) {
-				$this->relativeAddress = S($_SERVER['REQUEST_URI'])->stringByReplacingOccurrencesOfString($this->baseAddress(), S(""))->stringByTrimmingCharactersInSet(S("/"));
+				$this->relativeAddress = S($this->server()['REQUEST_URI'])->stringByReplacingOccurrencesOfString($this->baseAddress(), S(""))->stringByTrimmingCharactersInSet(S("/"));
 			}
 			return $this->relativeAddress;
 		}
@@ -219,12 +277,12 @@
 		public function baseUrl() {
 			if (!$this->baseUrl) {
 				$url = new MMutableString();
-				if (!empty($_SERVER['HTTPS'])) {
+				if (!empty($this->server()['HTTPS'])) {
 					$url->appendString(S("https://"));
 				} else {
 					$url->appendString(S("http://"));
 				}
-				$url->appendString(S($_SERVER['HTTP_HOST']));
+				$url->appendString(S($this->server()['HTTP_HOST']));
 				$this->baseUrl = $url;
 			}
 			return $this->baseUrl;

@@ -48,9 +48,9 @@
 		// ************************************************************
 		//
 		
-		protected $headElementView;
-		protected $bodyElementView;
-		protected $titleElementView;
+		protected $head;
+		protected $title;
+		protected $body;
 		
 		/**
 		 * 
@@ -60,14 +60,16 @@
 		public function __construct(MString $title = null) {
 			parent::__construct(S("html"));
 			
-			$this->headElementView = new MHTMLElementView(S("head"));
-			$this->addSubview($this->headElementView);
+			$this->head = new MHTMLElementView(S("head"));
+			$this->addSubview($this->head);
 			
-			$this->bodyElementView = new MHTMLElementView(S("body"));
-			$this->addSubview($this->bodyElementView);
+			$this->title = new MHTMLElementView(S("title"), $title);
+			$this->head->addSubview($this->title);
 			
-			$this->titleElementView = new MHTMLElementView(S("title"), $title);
-			$this->headElementView->addSubview($this->titleElementView);
+			$this->body = new MHTMLElementView(S("body"));
+			$this->addSubview($this->body);
+			
+			$this->setShouldAppendEmptyLine(true);
 		}
 		
 		/******************** Properties ********************/
@@ -75,88 +77,22 @@
 		/**
 		 * @return MHTMLElementView
 		 */
-		public function headElementView() {
-			return $this->headElementView;
+		public function head() {
+			return $this->head;
 		}
 	
 		/**
 		 * @return MHTMLElementView
 		 */
-		public function bodyElementView() {
-			return $this->bodyElementView;
+		public function body() {
+			return $this->body;
 		}
 	
 		/**
 		 * @return MHTMLElementView
-		 */
-		public function titleElementView() {
-			return $this->titleElementView;
-		}
-		
-		/**
-		 *
-		 *
-		 * @return void
-		 */
-		public function addHeadElement(MHTMLElementView $element) {
-			$this->headElementView()->addSubview($element);
-		}
-		
-		/**
-		 *
-		 *
-		 * @return void
-		 */
-		public function removeHeadElement(MHTMLElementView $element) {
-			$this->headElementView()->removeSubview($element);
-		}
-		
-		/**
-		 *
-		 *
-		 * @return MArray
-		 */
-		public function headElements() {
-			return $this->headElementView()->subviews();
-		}
-		
-		/**
-		 * @return void
-		 */
-		public function addBodyElement(MHTMLView $view) {
-			$this->bodyElementView()->addSubview($view);
-		}
-	
-		/**
-		 * @return void
-		 */
-		public function removeBodyElement(MHTMLView $view) {
-			$this->bodyElementView()->removeSubview($view);
-		}
-	
-		/**
-		 * @return MArray
-		 */
-		public function bodyElements() {
-			return $this->bodyElementView()->subviews();
-		}
-		
-		/**
-		 * 
-		 *
-		 * @return void
-		 */
-		public function setTitle(MString $title) {
-			$this->titleElementView()->setText($title);
-		}
-		
-		/**
-		 * 
-		 *
-		 * @return MString
 		 */
 		public function title() {
-			return $this->titleElementView()->text();
+			return $this->title;
 		}
 		
 	}

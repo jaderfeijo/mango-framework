@@ -82,7 +82,7 @@
 			if (!MAppDelegate()->didRecoverFromError($level, $message, $file, $line, $context)) {
 				logError($level, $message, $file, $line);
 				
-				if (!isRunningFromCommandLine()) {
+				if (!isRunningFromCommandLine() || isRunningInSimulatedRequestMode()) {
 					$response = new MHTTPViewControllerResponse(new MErrorViewController(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR, N(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR), S("Internal Server Error"), S("Sorry but the page you are looking for could not be loaded due to an internal server error")));
 					$response->setCode(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR);
 					MDie($response);
@@ -110,7 +110,7 @@
 		if (!MAppDelegate()->didRecoverFromUncaughtException($exception)) {
 			logException($exception);
 			
-			if (!isRunningFromCommandLine()) {
+			if (!isRunningFromCommandLine() || isRunningInSimulatedRequestMode()) {
 				$response = new MHTTPViewControllerResponse(new MErrorViewController(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR, N(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR), S("Internal Server Error"), S("Sorry but the page you are looking for could not be loaded due to an internal server error")));
 				$response->setCode(MHTTPResponse::RESPONSE_INTERNAL_SERVER_ERROR);
 				MDie($response);
@@ -302,9 +302,71 @@
 	function isRunningFromCommandLine() {
 		if (PHP_SAPI == 'cli') {
 			return true;
-		} else {
-			return false;
 		}
+		return false;
+	}
+	
+	/**
+	 * @internal
+	 *
+	 * Returns a boolean indicating whether or not this application
+	 * is running in simulated request mode.
+	 *
+	 * @return bool true if this application is running in simulated
+	 * request mode.
+	 */
+	function isRunningInSimulatedRequestMode() {
+		global $argv;
+		if (count($argv) > 0) {
+			if ($argv[1] == "--simulate-request") {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * @internal
+	 *
+	 * Returns the file name containing the simulated request
+	 * parameters. This file name is specified in the command
+	 * line when calling the application in simulated mode.
+	 *
+	 * @see isRunningInSimulatedRequestMode()
+	 * @see "--simulate-request"
+	 *
+	 * @return string The file name containing the simulated request
+	 * or null if not running in simulated request mode or if no
+	 * file name is specified.
+	 */
+	function simulatedRequestFileName() {
+		global $argv;
+		if (isRunningFromCommandLine() && isRunningInSimulatedRequestMode()) {
+			if (isset($argv[2])) {
+				return $argv[2];
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * @internal
+	 *
+	 * Returns the name of the request that should be used
+	 *
+	 * @see isRunningInSimulaterRequestMode()
+	 * @see "--simulate-request"
+	 *
+	 * @return string The name of the request that should be used
+	 */
+	function simulatedRequestName() {
+		global $argv;
+		if (isRunningFromCommandLine() && isRunningInSimulatedRequestMode()) {
+			if (isset($argv[3])) {
+				return $argv[3];
+			}
+		}
+		return null;
 	}
 
 ?>

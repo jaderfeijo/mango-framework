@@ -266,7 +266,10 @@
 		 * false otherwise.
 		 */
 		public function isRunningFromCommandLine() {
-			return isRunningFromCommandLine();
+			if (isRunningFromCommandLine() && !isRunningInSimulatedRequestMode()) {
+				return true;
+			}
+			return false;
 		}
 		
 		/**
