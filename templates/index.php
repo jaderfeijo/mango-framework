@@ -27,12 +27,12 @@
 	 * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 	 * SUCH DAMAGE.
 	 */
-
-	require('system/MangoFramework.php');
+	
+	require_once('system/classes/MangoFramework.php');
 	
 	import('mango.system.*');
 	
 	$application = new MApplication();
 	$application->run();
-
+	
 ?>
