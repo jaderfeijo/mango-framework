@@ -19,9 +19,9 @@ platforms may work but have not been tested.
 In order to run the Mango installer you'll need to have `sudo` and
 `hhvm` installed.
 
-`Apigen` is also required for document generation, this is done at install
+ApiGen is also required for document generation, this is done at install
 time and every time you install new framework versions. If you do not
-have `Apigen` installed the document generation will fail.
+have ApiGen installed the document generation will fail.
 
 Mango Framework will work with both Nginx and Apache. Other web servers may
 be supported but have not yet been tested.
@@ -33,7 +33,7 @@ Installing Dependencies
  
 2. Next, let's install `hhvm`. Please follow the steps outlined [here](https://github.com/facebook/hhvm/wiki/Prebuilt-Packages-on-Debian-7)
 
-3. Once HHVM is installed we can proceed to install ApiGen. First let's install pear:
+3. Once HHVM is installed we can proceed to install ApiGen. First let's install Pear:
 
  `$ sudo apt-get install php-pear`
 
@@ -42,7 +42,7 @@ of the HHVM interpreter. Let's fix this by running
 
  `$ sudo /usr/bin/update-alternatives --install /usr/bin/php php /usr/bin/hhvm 60`
  
-5. Follow the steps outline [here](http://apigen.org/##installation) to install Apigen
+5. To install `apigen`, please follow the steps outlined [here](http://apigen.org/##installation)
 
 Installing Mango
 ------------------------------------
