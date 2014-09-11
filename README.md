@@ -18,9 +18,15 @@ Installing Mango is easy! Simply open a new Terminal window and type in
 the following:
 
  `$ curl -L https://github.com/jaderfeijo/mango-framework/raw/installer/install | bash /dev/stdin`
- 
+
 This will download the latest version of the install script and install Mango in the `/usr/lib/mango`
 path as well as create a symlink to the `mango` command line utility at `/usr/bin/mango`
+
+You can also specify a certain branch to install from. For example, if you wish to install
+the `development` version of Mango, simply specify `development` as the last parameter as
+demonstrated below:
+
+ ` $ curl -L https://github.com/jaderfeijo/mango-framework/raw/installer/install | bash /dev/stdin development`
 
 Uninstalling
 ------------------------------------
