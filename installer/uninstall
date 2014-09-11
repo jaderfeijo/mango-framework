@@ -1,0 +1,32 @@
+#!/bin/bash
+
+MANGO_INSTALL_PATH="/usr/lib/mango"
+MANGO_BINARY_PATH="/usr/bin/mango"
+
+echo "===================================================================="
+echo "Mango Framework Uninstaller"
+echo "===================================================================="
+echo "This script will uninstall all versions of the Mango Framework"
+echo "and System tools in the following paths:"
+echo ""
+echo " $MANGO_INSTALL_PATH"
+echo " $MANGO_BINARY_PATH"
+echo ""
+
+while true; do
+	read -p "Would you like to coninue uninstalling [Y/n] " yn
+	case $yn in
+		[Nn]* ) echo "Aborting..."; exit;;
+		* ) break;;
+	esac
+done
+
+echo "* Removing files..."
+
+rm -r $MANGO_INSTALL_PATH
+rm $MANGO_BINARY_PATH
+
+echo "===================================================================="
+echo "All done!"
+echo "===================================================================="
+echo ""
