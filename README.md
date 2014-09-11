@@ -29,9 +29,7 @@ be supported but have not yet been tested.
 Installing Dependencies
 ------------------------------------
 
-1. First make sure you have `sudo` installed. If you don't you can get it by typing:
-
- `$ sudo apt-get install sudo`
+1. First make sure you have `sudo` installed. Follow the steps outline [here](http://www.ducea.com/2006/05/18/install-sudo-on-debian/)
  
 2. Next, let's install `hhvm`. Please follow the steps outlined [here](https://github.com/facebook/hhvm/wiki/Prebuilt-Packages-on-Debian-7)
 
