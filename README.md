@@ -50,7 +50,7 @@ Installing Mango
 Once all the dependencies have been installed, installing Mango it is easy!
 Simply open a new Terminal window and type in the following:
 
- `$ curl -L https://github.com/jaderfeijo/mango-framework/raw/installer/install | sudo sh`
+ `$ curl -L https://github.com/jaderfeijo/mango-framework/raw/master/installer/install | sudo sh`
 
 This will download the latest version of the install script and install Mango in the `/usr/lib/mango`
 path as well as create a symlink to the `mango` command line utility at `/usr/bin/mango`
@@ -59,7 +59,7 @@ You can also specify a certain branch to install from. For example, if you wish 
 the `development` version of Mango, simply specify `development` as the last parameter as
 demonstrated below:
 
- ` $ curl -L https://github.com/jaderfeijo/mango-framework/raw/installer/install | sudo sh development`
+ ` $ curl -L https://github.com/jaderfeijo/mango-framework/raw/master/installer/uninstall | sudo sh development`
 
 Uninstalling
 ------------------------------------
