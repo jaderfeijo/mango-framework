@@ -11,6 +11,20 @@ Mango also has a powerful Object Relational Mapper (ORM) which allows you
 to create complex data structures and APIs without ever having to touch
 the database or manage any SQL manually.
 
+Requirements
+------------------------------------
+Mango Framework is supported on both Mac OS X 10.9 and Debian 7.6. Other
+platforms may work but have not been tested.
+
+In order to run Mango you'll need the following installed on your system:
+
+* hhvm
+* sudo
+* apigen
+
+Mango Framework will work with both Nginx and Apache. Other web servers may
+be supported but have not been tested.
+
 Installing
 ------------------------------------
 
