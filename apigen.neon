@@ -6,7 +6,7 @@
 # directory and run 'apigen' from the console
 
 title: "Mango Framework 1.0"
-source: system
+source: classes
 destination: docs
 main: M
 internal: no

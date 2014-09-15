@@ -28,9 +28,7 @@
 	 * SUCH DAMAGE.
 	 */
 	
-	require_once('system/classes/MangoFramework.php');
-	
-	import('mango.system.*');
+	require('libraries.php');
 	
 	$application = new MApplication();
 	$application->run();

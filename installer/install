@@ -1,5 +1,121 @@
 #!/bin/bash
 
+# Utility Functions
+
+vercomp() {
+    if [[ $1 == $2 ]]
+    then
+        return 0
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    # fill empty fields in ver1 with zeros
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+    do
+        ver1[i]=0
+    done
+    for ((i=0; i<${#ver1[@]}; i++))
+    do
+        if [[ -z ${ver2[i]} ]]
+        then
+            # fill empty fields in ver2 with zeros
+            ver2[i]=0
+        fi
+        if ((10#${ver1[i]} > 10#${ver2[i]}))
+        then
+            return 1
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]}))
+        then
+            return 2
+        fi
+    done
+    return 0
+}
+
+# Installer Functions
+
+begin() {
+	echo "===================================================================="
+	echo "Mango Framework Installer"
+	echo "===================================================================="
+	echo "This script will install the '$MANGO_BRANCH' version of the"
+	echo "Mango Framework and System tools in the following paths:"
+	echo ""
+	echo " $MANGO_INSTALL_PATH"
+	echo " $MANGO_BINARY_PATH"
+	echo ""
+	
+	while true; do
+		read -p "Do you wish to proceed with the installation [Y/n] " yn
+		case $yn in
+			[Nn]* ) echo "Aborting..."; exit;;
+			* ) break;;
+		esac
+	done
+}
+
+downloadMango() {
+	mkdir "$MANGO_TEMP_PATH"
+	curl -L "$MANGO_SOURCE" > "$MANGO_TEMP_PATH/mango-$MANGO_BRANCH.zip"
+	unzip "$MANGO_TEMP_PATH/mango-$MANGO_BRANCH.zip" -d "$MANGO_TEMP_PATH"
+}
+
+generateDocs() {
+	(cd "$MANGO_TEMP_PATH/mango-framework-$MANGO_BRANCH"; apigen)
+}
+
+installFramework() {
+	mkdir "$MANGO_INSTALL_PATH"
+	mkdir "$MANGO_INSTALL_PATH/$MANGO_LIBRARY_FOLDER"
+	mkdir "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER"
+	mkdir "$FRAMEWORK_INSTALL_PATH"
+	cp -r "$MANGO_TEMP_PATH/mango-framework-$MANGO_BRANCH/." "$FRAMEWORK_INSTALL_PATH"
+	ln -s "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/current" "$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER"
+	ln -s "$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER/tools" "$MANGO_INSTALL_PATH/tools"
+	ln -s "$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER/docs" "$MANGO_INSTALL_PATH/docs"
+	ln -s "$MANGO_INSTALL_PATH/tools/mango" "$MANGO_BINARY_PATH"
+	
+	local HIGHEST_VERSION=''
+	for f in "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/*"; do
+		local VERSION=`cat $f/VERSION`
+		if [ $(vercomp $HIGHEST_VERSION $VERSION) = 2 ]; then
+			HIGHEST_VERSION=$VERSION
+		fi
+	done
+	
+	ln -s "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/$HIGHEST_VERSION" "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/latest"
+	if [ ! -f "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/current" ]; then
+		ln -s "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/latest" "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/current"
+	fi
+}
+
+cleanup() {
+	rm -r "$MANGO_TEMP_PATH"
+}
+
+summary() {
+	echo "===================================================================="
+	echo "All done :-)"
+	echo "===================================================================="
+	echo "You can now type to check if everything installed correctly:"
+	echo ""
+	echo " $ mango version"
+	echo ""
+	echo "If everything went well, the currently selected version of the mango"
+	echo "framework will be printed to the console"
+	echo ""
+	echo "Have fun!"
+	echo ""
+	echo "If you find this software useful please don't forget to donate!"
+	echo ""
+	echo "Bitcoin: 14j8rsDX238cxTgcW9EBDFK6eY43WA2P9V"
+	echo "PayPal: jader.feijo@gmail.com"
+	echo ""
+	echo "Thank you for using Mango Framework!"
+	echo ""
+}
+
 MANGO_BRANCH="$1"
 
 if [ -z "$1" ]; then
@@ -10,71 +126,25 @@ MANGO_SOURCE="https://github.com/jaderfeijo/mango-framework/archive/$MANGO_BRANC
 MANGO_DEV_SOURCE="https://github.com/jaderfeijo/mango-framework/archive/$MANGO_BRANCH.zip"
 MANGO_INSTALL_PATH="/usr/lib/mango"
 MANGO_BINARY_PATH="/usr/bin/mango"
-MANGO_SYSTEM_FOLDER="system"
 MANGO_LIBRARY_FOLDER="library"
+MANGO_SYSTEM_FOLDER="system"
 MANGO_TEMP_PATH="/tmp/mango"
 
-echo "===================================================================="
-echo "Mango Framework Installer"
-echo "===================================================================="
-echo "This script will install the latest version of the Mango Framework"
-echo "and System tools in the following paths:"
-echo ""
-echo " $MANGO_INSTALL_PATH"
-echo " $MANGO_BINARY_PATH"
-echo ""
-
-while true; do
-	read -p "Do you wish to proceed with the installation [Y/n] " yn
-	case $yn in
-		[Nn]* ) echo "Aborting..."; exit;;
-		* ) break;;
-	esac
-done
-
+begin
+proceed
 
 echo "* Downloading the latest framework..."
-mkdir "$MANGO_TEMP_PATH"
-curl -L "$MANGO_SOURCE" > "$MANGO_TEMP_PATH/mango-$MANGO_BRANCH.zip"
-unzip "$MANGO_TEMP_PATH/mango-$MANGO_BRANCH.zip" -d "$MANGO_TEMP_PATH"
+downloadMango
 
 echo "* Generating docs..."
-(cd "$MANGO_TEMP_PATH/mango-framework-$MANGO_BRANCH"; apigen)
+generateDocs
 
 echo "* Installing latest framework version..."
-
 MANGO_CURRENT_VERSION=`cat "$MANGO_TEMP_PATH/mango-framework-$MANGO_BRANCH/VERSION"`
-FRAMEWORK_INSTALL_PATH="$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER/$MANGO_CURRENT_VERSION"
-
-mkdir "$MANGO_INSTALL_PATH"
-mkdir "$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER"
-mkdir "$MANGO_INSTALL_PATH/$MANGO_LIBRARY_FOLDER"
-mkdir "$FRAMEWORK_INSTALL_PATH"
-cp -r "$MANGO_TEMP_PATH/mango-framework-$MANGO_BRANCH/." "$FRAMEWORK_INSTALL_PATH"
-ln -s "$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER/$MANGO_CURRENT_VERSION" "$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER/current"
-ln -s "$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER/current/tools" "$MANGO_INSTALL_PATH/tools"
-ln -s "$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER/current/docs" "$MANGO_INSTALL_PATH/docs"
-ln -s "$MANGO_INSTALL_PATH/tools/mango" "$MANGO_BINARY_PATH"
+SYSTEM_BASE_FOLDER="$MANGO_LIBRARY_FOLDER/$MANGO_SYSTEM_FOLDER"
+FRAMEWORK_INSTALL_PATH="$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/$MANGO_CURRENT_VERSION"
+installFramework
 
 echo "* Cleaning up..."
-rm -r "$MANGO_TEMP_PATH"
-
-echo "===================================================================="
-echo "All done :-)"
-echo "===================================================================="
-echo "You can now type to check if everything installed correctly:"
-echo ""
-echo " $ mango version"
-echo ""
-echo "If everything went well, the currently selected version of the mango"
-echo "framework will be printed to the console"
-echo ""
-echo "Have fun!"
-echo ""
-echo "If you find this software useful please don't forget to donate!"
-echo ""
-echo "Bitcoin: 14j8rsDX238cxTgcW9EBDFK6eY43WA2P9V"
-echo "PayPal: jader.feijo@gmail.com"
-echo ""
-echo "Thank you for using Mango Framework!"
-echo ""
+cleanup
+summary
