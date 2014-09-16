@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<application delegate="com.yourcompany.yourapp.ApplicationDelegate">
-
-	<controller class="com.yourcompany.yourapp.MainViewController">
-		<accept method="GET"/>
-	</controller>
-
-</application>
