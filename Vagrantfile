@@ -23,7 +23,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder './mango', '/usr/lib/mango'
 
   # Provision the machine
-  config.vm.provision :shell, path: "development/provision.sh"
+  config.vm.provision :shell, path: "provision.sh"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
