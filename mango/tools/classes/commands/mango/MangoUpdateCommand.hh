@@ -44,7 +44,7 @@ class MangoUpdateCommand extends Command {
 			file_put_contents("$tmpFolder/$fileName", fopen($onlineSource, 'r'));
 
 			// extract package
-			$extractFolder = "$tmpFolder/mango-$branch";
+			$extractFolder = "mango-framework-$branch";
 			$zip = new ZipArchive();
 			if ($zip->open("$tmpFolder/$fileName") === true) {
 				$zip->extractTo($extractFolder);
