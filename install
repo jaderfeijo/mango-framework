@@ -61,7 +61,6 @@ if [ -z "$1" ]; then
 fi
 
 MANGO_SOURCE="https://github.com/jaderfeijo/mango-framework/archive/$MANGO_BRANCH.zip"
-MANGO_DEV_SOURCE="https://github.com/jaderfeijo/mango-framework/archive/$MANGO_BRANCH.zip"
 MANGO_INSTALL_PATH="/usr/lib/mango"
 MANGO_BINARY_PATH="/usr/bin/mango"
 MANGO_LIBRARY_FOLDER="library"
@@ -120,8 +119,6 @@ if [ $(proceed "Do you wish to proceed with the installation?") ]; then
 	ln -s "$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER/tools" "$MANGO_INSTALL_PATH/tools"
 	ln -s "$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER/docs" "$MANGO_INSTALL_PATH/docs"
 	ln -s "$MANGO_INSTALL_PATH/tools/mango" "$MANGO_BINARY_PATH"
-	
-	
 	
 	ln -s "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/$HIGHEST_VERSION" "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/latest"
 	if [ ! -f "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/current" ]; then

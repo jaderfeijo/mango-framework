@@ -1,6 +1,0 @@
-#!/usr/bin/php
-<?php
-
-	echo "Hello from Mango!\n";
-
-?>
