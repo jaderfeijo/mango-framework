@@ -32,7 +32,11 @@ Installing Dependencies
 
 1. First make sure you have `sudo` installed. If you don't, simply follow the steps outline [here](http://www.ducea.com/2006/05/18/install-sudo-on-debian/)
  
-2. Next, let's install `hhvm`. Please follow the steps outlined [here](https://github.com/facebook/hhvm/wiki/Prebuilt-Packages-on-Debian-7)
+2. Let's also install `unzip` so that the mango installer can expand it's packages, we can install it with:
+
+ `$ sudo apt-get install unzip`
+
+3. Next, let's install `hhvm`. Please follow the steps outlined [here](https://github.com/facebook/hhvm/wiki/Prebuilt-Packages-on-Debian-7)
 
 Installing Mango
 ------------------------------------
@@ -49,7 +53,7 @@ You can also specify a certain branch to install from. For example, if you wish 
 the `development` version of Mango, simply specify `development` as the last parameter as
 demonstrated below:
 
- ` $ curl -L https://github.com/jaderfeijo/mango-framework/raw/master/install | sudo bash development`
+ `$ curl -L https://github.com/jaderfeijo/mango-framework/raw/master/install | sudo bash development`
 
 Uninstalling
 ------------------------------------
