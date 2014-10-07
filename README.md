@@ -60,7 +60,7 @@ Uninstalling
 
 To uninstall mango simply type:
 
- `$ curl -L https://github.com/jaderfeijo/mango-framework/raw/uninstall | sudo bash`
+ `$ curl -L https://github.com/jaderfeijo/mango-framework/raw/master/uninstall | sudo bash`
 
 This will remove all Mango Framework files from your system
 
