@@ -71,6 +71,7 @@ sudo git clone git://github.com/hhvm/vim-hack.git
 
 # setup mango-framework
 echo '****************** Setting up Mango-Framework  ******************'
+sudo mkdir /usr/lib/mango/library
 sudo ln -s /usr/lib/mango/tools/mango /usr/bin/mango
 
 # finish up
