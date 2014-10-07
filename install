@@ -112,8 +112,8 @@ if [ "$channel_op" != "" ]; then
 fi
 
 # define installation variables
-MANGO_SOURCE="https://github.com/jaderfeijo/mango-framework/archive/$MANGO_BRANCH.zip"
-MANGO_SOURCE_RAW="https://raw.githubusercontent.com/jaderfeijo/mango-framework/$MANGO_BRANCH"
+MANGO_SOURCE="https://github.com/jaderfeijo/mango-framework/archive/$CHANNEL.zip"
+MANGO_SOURCE_RAW="https://raw.githubusercontent.com/jaderfeijo/mango-framework/$CHANNEL"
 MANGO_INSTALL_PATH="/usr/lib/mango"
 MANGO_BINARY_PATH="/usr/bin/mango"
 MANGO_LIBRARY_FOLDER="library"
@@ -124,7 +124,7 @@ if [ $NON_INTERACTIVE_MODE = false ]; then
 	echo "===================================================================="
 	echo "Mango Framework Installer"
 	echo "===================================================================="
-	echo "This script will install the '$MANGO_BRANCH' version of the"
+	echo "This script will install the '$CHANNEL' version of the"
 	echo "Mango Framework in the following paths:"
 	echo ""
 	echo " $MANGO_INSTALL_PATH"
@@ -138,9 +138,9 @@ if proceed "Do you wish to proceed with the installation?" "$NON_INTERACTIVE_MOD
 	if needsUpdate "$MANGO_INSTALL_PATH" "$MANGO_SOURCE_RAW/mango"; then
 		echo "* Downloading the latest framework..."
 		mkdir "$MANGO_TEMP_PATH"
-		curl -L "$MANGO_SOURCE" > "$MANGO_TEMP_PATH/mango-$MANGO_BRANCH.zip"
-		unzip "$MANGO_TEMP_PATH/mango-$MANGO_BRANCH.zip" -d "$MANGO_TEMP_PATH"
-		LOCAL_MANGO_PATH="$MANGO_TEMP_PATH/mango-framework-$MANGO_BRANCH/mango"
+		curl -L "$MANGO_SOURCE" > "$MANGO_TEMP_PATH/mango-$CHANNEL.zip"
+		unzip "$MANGO_TEMP_PATH/mango-$CHANNEL.zip" -d "$MANGO_TEMP_PATH"
+		LOCAL_MANGO_PATH="$MANGO_TEMP_PATH/mango-framework-$CHANNEL/mango"
 		
 		echo "* Installing latest framework version..."
 		if [ ! -d "$MANGO_INSTALL_PATH" ]; then
@@ -150,8 +150,10 @@ if proceed "Do you wish to proceed with the installation?" "$NON_INTERACTIVE_MOD
 			mkdir "$MANGO_INSTALL_PATH/$MANGO_LIBRARY_FOLDER"
 		fi
 		cp -rf "$LOCAL_MANGO_PATH" "$MANGO_INSTALL_PATH"
-		ln -s "$MANGO_INSTALL_PATH/tools/mango" "$MANGO_BINARY_PATH"
-		
+		if [ ! -f "$MANGO_BINARY_PATH" ]; then
+			ln -s "$MANGO_INSTALL_PATH/tools/mango" "$MANGO_BINARY_PATH"
+		fi
+
 		echo "* Cleaning up..."
 		rm -r "$MANGO_TEMP_PATH"
 		
