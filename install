@@ -87,6 +87,15 @@ proceed() {
 	fi
 }
 
+usage() {
+	echo "install: $1"
+	echo "  usage: install [-y] [channel]"
+	echo ""
+	echo "     -y: non-interactive mode, does not ask for confirmation before proceeding"
+	echo "channel: the channel you wish to install mango from. Defaults to 'master'. Possible values could be 'beta' or 'development'"
+	echo ""
+}
+
 # parse command line arguments
 NON_INTERACTIVE_MODE=false
 CHANNEL="master"
@@ -149,11 +158,11 @@ if proceed "Do you wish to proceed with the installation?" "$NON_INTERACTIVE_MOD
 		if [ ! -d "$MANGO_INSTALL_PATH/$MANGO_LIBRARY_FOLDER" ]; then
 			mkdir "$MANGO_INSTALL_PATH/$MANGO_LIBRARY_FOLDER"
 		fi
-		cp -rf "$LOCAL_MANGO_PATH" "$MANGO_INSTALL_PATH"
+		cp -rf "$LOCAL_MANGO_PATH/*" "$MANGO_INSTALL_PATa"
 		if [ ! -f "$MANGO_BINARY_PATH" ]; then
 			ln -s "$MANGO_INSTALL_PATH/tools/mango" "$MANGO_BINARY_PATH"
 		fi
-
+		
 		echo "* Cleaning up..."
 		rm -r "$MANGO_TEMP_PATH"
 		

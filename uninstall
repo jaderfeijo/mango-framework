@@ -1,32 +1,70 @@
 #!/bin/bash
 
-MANGO_INSTALL_PATH="/usr/lib/mango"
-MANGO_BINARY_PATH="/usr/bin/mango"
+proceed() {
+	if [ $2 = true ]; then
+		return 0
+	else
+		while true; do
+			read -p "$1 [Y/n] " yn
+			case $yn in
+				[Nn]* ) return 1;;
+				* ) return 0;;
+			esac
+		done
+	fi
+}
 
-echo "===================================================================="
-echo "Mango Framework Uninstaller"
-echo "===================================================================="
-echo "This script will uninstall all versions of the Mango Framework"
-echo "and System tools in the following paths:"
-echo ""
-echo " $MANGO_INSTALL_PATH"
-echo " $MANGO_BINARY_PATH"
-echo ""
+usage() {
+	echo "uninstall: $1"
+	echo "    usage: uninstall [-y]"
+	echo ""
+	echo "       -y: non-interactive mode, does not ask for confirmation before proceeding"
+	echo ""
+}
 
-while true; do
-	read -p "Would you like to coninue uninstalling [Y/n] " yn
-	case $yn in
-		[Nn]* ) echo "Aborting..."; exit;;
-		* ) break;;
+# parse command line arguments
+NON_INTERACTIVE_MODE=false
+while getopts ":y" opt; do
+	case $opt in
+		y)
+			NON_INTERACTIVE_MODE=true
+		;;
+		/?)
+			usage "Invalid option: -$OPTARG"
+			exit 1
+		;;
+		--) 
+			break
+		;;
 	esac
 done
 
-echo "* Removing files..."
+MANGO_INSTALL_PATH="/usr/lib/mango"
+MANGO_BINARY_PATH="/usr/bin/mango"
 
-rm -r $MANGO_INSTALL_PATH
-rm $MANGO_BINARY_PATH
+if [ $NON_INTERACTIVE_MODE = false ]; then
+	echo "===================================================================="
+	echo "Mango Framework Uninstaller"
+	echo "===================================================================="
+	echo "This script will uninstall all versions of the Mango Framework"
+	echo "and System tools in the following paths:"
+	echo ""
+	echo " $MANGO_INSTALL_PATH"
+	echo " $MANGO_BINARY_PATH"
+	echo ""
+fi
 
-echo "===================================================================="
-echo "All done!"
-echo "===================================================================="
-echo ""
+if proceed "Would you like to continue uninstalling?" "$NON_INTERACTIVE_MODE"; then
+	echo "* Removing files..."
+	
+	rm -r $MANGO_INSTALL_PATH
+	rm $MANGO_BINARY_PATH
+	
+	echo "===================================================================="
+	echo "All done!"
+	echo "===================================================================="
+	echo ""
+else
+	echo "Aborting..."
+fi
+
