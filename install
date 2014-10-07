@@ -44,109 +44,140 @@ highestVersion() {
 	return $HIGHEST_VERSION
 }
 
-proceed() {
-	while true; do
-		read -p "$1 [Y/n] " yn
-		case $yn in
-			[Nn]* ) return 1;;
-			* ) return 0;;
-		esac
-	done
+localVersion() {
+	local VERSION=`cat $1/VERSION`
+	local REVISION=`cat $1/REVISION`
+	echo "$VERSION.$REVISION"
 }
 
-MANGO_BRANCH="$1"
+onlineVersion() {
+	local VERSION=`curl $1/VERSION`
+	local REVISION=`curl $1/REVISION`
+	echo "$VERSION.$REVISION"
+}
 
-if [ -z "$1" ]; then
-	MANGO_BRANCH="master"
+needsUpdate() {
+	if [ -f "$1" ]; then
+		local LOCAL_VERSION=$(localVersion "$1")
+		local ONLINE_VERSION=$(onlineVersion "$2/mango")
+		local CMP=(vercmp $LOCAL_VERSION $ONLINE_VERSION)
+		if [ CMP == 0 ]; then 
+			return 1
+		elif [ CMP == 1 ]; then
+			return 1
+		else
+			return 0
+		fi
+	else
+		return 0
+	fi
+}
+
+proceed() {
+	if [ $2 = true ]; then
+		return 0
+	else
+		while true; do
+			read -p "$1 [Y/n] " yn
+			case $yn in
+				[Nn]* ) return 1;;
+				* ) return 0;;
+			esac
+		done
+	fi
+}
+
+# parse command line arguments
+NON_INTERACTIVE_MODE=false
+CHANNEL="master"
+while getopts ":y" opt; do
+	case $opt in
+		y)
+			NON_INTERACTIVE_MODE=true
+		;;
+		/?)
+			usage "Invalid option: -$OPTARG"
+			exit 1
+		;;
+		--) 
+			break
+		;;
+	esac
+done
+shift $((OPTIND-1))
+[ "$1" = "--" ] && shift
+channel_op=($@)
+if [ "$channel_op" != "" ]; then
+	CHANNEL="$channel_op"
 fi
 
+# define installation variables
 MANGO_SOURCE="https://github.com/jaderfeijo/mango-framework/archive/$MANGO_BRANCH.zip"
+MANGO_SOURCE_RAW="https://raw.githubusercontent.com/jaderfeijo/mango-framework/$MANGO_BRANCH"
 MANGO_INSTALL_PATH="/usr/lib/mango"
 MANGO_BINARY_PATH="/usr/bin/mango"
 MANGO_LIBRARY_FOLDER="library"
-MANGO_SYSTEM_FOLDER="system"
-MANGO_TEMP_PATH="/tmp/mango"
+MANGO_TEMP_PATH="/var/tmp/mango"
 
-echo "===================================================================="
-echo "Mango Framework Installer"
-echo "===================================================================="
-echo "This script will install the '$MANGO_BRANCH' version of the"
-echo "Mango Framework and System tools in the following paths:"
-echo ""
-echo " $MANGO_INSTALL_PATH"
-echo " $MANGO_BINARY_PATH"
-echo ""
+# begin installation
+if [ $NON_INTERACTIVE_MODE = false ]; then
+	echo "===================================================================="
+	echo "Mango Framework Installer"
+	echo "===================================================================="
+	echo "This script will install the '$MANGO_BRANCH' version of the"
+	echo "Mango Framework in the following paths:"
+	echo ""
+	echo " $MANGO_INSTALL_PATH"
+	echo " $MANGO_BINARY_PATH"
+	echo ""
+fi
 
-if [ $(proceed "Do you wish to proceed with the installation?") ]; then
-	echo "* Downloading the latest framework..."
-	mkdir "$MANGO_TEMP_PATH"
-	curl -L "$MANGO_SOURCE" > "$MANGO_TEMP_PATH/mango-$MANGO_BRANCH.zip"
-	unzip "$MANGO_TEMP_PATH/mango-$MANGO_BRANCH.zip" -d "$MANGO_TEMP_PATH"
-	
-	echo "* Generating docs..."
-	(cd "$MANGO_TEMP_PATH/mango-framework-$MANGO_BRANCH"; apigen)
-	
-	echo "* Installing latest framework version..."
-	MANGO_VERSION=`cat "$MANGO_TEMP_PATH/mango-framework-$MANGO_BRANCH/VERSION"`
-	MANGO_REVISION=`cat "$MANGO_TEMP_PATH/mango-framework-$MANGO_BRANCH/REVISION"`
-	SYSTEM_BASE_FOLDER="$MANGO_LIBRARY_FOLDER/$MANGO_SYSTEM_FOLDER"
-	FRAMEWORK_INSTALL_PATH="$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/$MANGO_VERSION"
-	
-	if [ ! -f "$MANGO_INSTALL_PATH" ]; then mkdir "$MANGO_INSTALL_PATH" fi
-	if [ ! -f "$MANGO_INSTALL_PATH/$MANGO_LIBRARY_FOLDER" ]; then mkdir "$MANGO_INSTALL_PATH/$MANGO_LIBRARY_FOLDER" fi
-	if [ ! -f "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER" ]; then mkdir "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER" fi
-	
-	if [ -f "$FRAMEWORK_INSTALL_PATH" ]; then
-		local VER=`cat $FRAMEWORK_INSTALL_PATH/VERSION`
-		local REV=`cat $FRAMEWORK_INSTALL_PATH/REVISION`
-		local VERSION="$VER.$REV"
-		local CMP=(vercmp $MANGO_VERSION $VERSION)
-		if [ CMP == 0 ]; then
-			echo "The latest version is already installed. Nothing to do!"
-			exit
-		elif [ CMP == 1 ]; then
-			echo "A higher version is alredy installed. Nothing to do!"
-			exit
-		else
-			rm -rf $FRAMEWORK_INSTALL_PATH
+# proceed confirmation
+if proceed "Do you wish to proceed with the installation?" "$NON_INTERACTIVE_MODE"; then
+	echo "* Checking currently installed version..."
+	if needsUpdate "$MANGO_INSTALL_PATH" "$MANGO_SOURCE_RAW/mango"; then
+		echo "* Downloading the latest framework..."
+		mkdir "$MANGO_TEMP_PATH"
+		curl -L "$MANGO_SOURCE" > "$MANGO_TEMP_PATH/mango-$MANGO_BRANCH.zip"
+		unzip "$MANGO_TEMP_PATH/mango-$MANGO_BRANCH.zip" -d "$MANGO_TEMP_PATH"
+		LOCAL_MANGO_PATH="$MANGO_TEMP_PATH/mango-framework-$MANGO_BRANCH/mango"
+		
+		echo "* Installing latest framework version..."
+		if [ ! -d "$MANGO_INSTALL_PATH" ]; then
+			mkdir "$MANGO_INSTALL_PATH"
 		fi
+		if [ ! -d "$MANGO_INSTALL_PATH/$MANGO_LIBRARY_FOLDER" ]; then
+			mkdir "$MANGO_INSTALL_PATH/$MANGO_LIBRARY_FOLDER"
+		fi
+		cp -rf "$LOCAL_MANGO_PATH" "$MANGO_INSTALL_PATH"
+		ln -s "$MANGO_INSTALL_PATH/tools/mango" "$MANGO_BINARY_PATH"
+		
+		echo "* Cleaning up..."
+		rm -r "$MANGO_TEMP_PATH"
+		
+		echo "===================================================================="
+		echo "All done :-)"
+		echo "===================================================================="
+		echo "You can now use the 'mango' command:"
+		echo ""
+		echo " $ mango info"
+		echo ""
+		echo "If everything went well, the current version of the mango"
+		echo "framework will be printed to the console"
+		echo ""
+		echo "Have fun!"
+		echo ""
+		echo "If you find this software useful please don't forget to donate!"
+		echo ""
+		echo "Bitcoin: 14j8rsDX238cxTgcW9EBDFK6eY43WA2P9V"
+		echo "PayPal: jader.feijo@gmail.com"
+		echo ""
+		echo "Thank you for using Mango Framework!"
+		echo ""
+	else
+		echo "Currently installed version is up to date!"
 	fi
-	
-	mkdir "$FRAMEWORK_INSTALL_PATH"
-	cp -r "$MANGO_TEMP_PATH/mango-framework-$MANGO_BRANCH/." "$FRAMEWORK_INSTALL_PATH"
-	
-	ln -s "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/current" "$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER"
-	ln -s "$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER/tools" "$MANGO_INSTALL_PATH/tools"
-	ln -s "$MANGO_INSTALL_PATH/$MANGO_SYSTEM_FOLDER/docs" "$MANGO_INSTALL_PATH/docs"
-	ln -s "$MANGO_INSTALL_PATH/tools/mango" "$MANGO_BINARY_PATH"
-	
-	ln -s "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/$HIGHEST_VERSION" "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/latest"
-	if [ ! -f "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/current" ]; then
-		ln -s "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/latest" "$MANGO_INSTALL_PATH/$SYSTEM_BASE_FOLDER/current"
-	fi
-	
-	echo "* Cleaning up..."
-	rm -r "$MANGO_TEMP_PATH"
-	
-	echo "===================================================================="
-	echo "All done :-)"
-	echo "===================================================================="
-	echo "You can now use the 'mango' command:"
-	echo ""
-	echo " $ mango version"
-	echo ""
-	echo "If everything went well, the currently selected version of the mango"
-	echo "framework will be printed to the console"
-	echo ""
-	echo "Have fun!"
-	echo ""
-	echo "If you find this software useful please don't forget to donate!"
-	echo ""
-	echo "Bitcoin: 14j8rsDX238cxTgcW9EBDFK6eY43WA2P9V"
-	echo "PayPal: jader.feijo@gmail.com"
-	echo ""
-	echo "Thank you for using Mango Framework!"
-	echo ""
 else
 	echo "Aborted!"
 fi
+
