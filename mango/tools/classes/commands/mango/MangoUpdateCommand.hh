@@ -11,8 +11,8 @@ class MangoUpdateCommand extends Command {
 	}
 
 	public function mangoOnlineVersion(string $branch): Version {
-		$versionURL = "https://raw.githubusercontent.com/jaderfeijo/mango-framework/$branch/VERSION";
-		$revisionURL = "https://raw.githubusercontent.com/jaderfeijo/mango-framework/$branch/REVISION";
+		$versionURL = "https://raw.githubusercontent.com/jaderfeijo/mango-framework/$branch/mango/VERSION";
+		$revisionURL = "https://raw.githubusercontent.com/jaderfeijo/mango-framework/$branch/mango/REVISION";
 		$versionString = $this->getContentsOfURL($versionURL);
 		$revisionString = $this->getContentsOfURL($revisionURL);
 		return Version::parse($versionString.'.'.$revisionString);
