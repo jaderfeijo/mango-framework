@@ -200,3 +200,4 @@ if (proceed('Do you wish to proceed with the installation?', $NON_INTERACTIVE_MO
 } else {
 	printLn("Aborting...");
 }
+
