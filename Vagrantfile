@@ -18,9 +18,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Forward ports
   config.vm.network :forwarded_port, host: 8080, guest: 80
 
-  # folder sync
-  config.vm.synced_folder './mango', '/usr/lib/mango'
-
   # Provision the machine
   config.vm.provision :shell, path: "provision.sh"
 

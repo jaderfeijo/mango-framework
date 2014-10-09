@@ -1,194 +1,191 @@
-#!/bin/bash
+#!/usr/bin/hhvm
+<?hh
 
-# Utility Functions
+// define some constants
+define('MANGO_TEMP_PATH', '/var/tmp/mango');
+define('MANGO_INSTALL_PATH', '/usr/lib/mango');
+define('MANGO_BINARY_PATH', '/usr/bin/mango');
+define('MANGO_LIBRARY_FOLDER', 'library');
+define('MANGO_FRAMEWORK_FOLDER', 'framework');
 
-vercmp() {
-    if [[ $1 == $2 ]]
-    then
-        return 0
-    fi
-    local IFS=.
-    local i ver1=($1) ver2=($2)
-    # fill empty fields in ver1 with zeros
-    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
-    do
-        ver1[i]=0
-    done
-    for ((i=0; i<${#ver1[@]}; i++))
-    do
-        if [[ -z ${ver2[i]} ]]
-        then
-            # fill empty fields in ver2 with zeros
-            ver2[i]=0
-        fi
-        if ((10#${ver1[i]} > 10#${ver2[i]}))
-        then
-            return 1
-        fi
-        if ((10#${ver1[i]} < 10#${ver2[i]}))
-        then
-            return 2
-        fi
-    done
-    return 0
+function printLn(string $line): void {
+	printf("%s\n", $line);
 }
 
-highestVersion() {
-	local HIGHEST_VERSION=''
-	for f in "$1/*"; do
-		local VERSION=`cat $f/VERSION`
-		if [ $(vercmp $HIGHEST_VERSION $VERSION) = 2 ]; then
-			HIGHEST_VERSION=$VERSION
-		fi
-	done
-	return $HIGHEST_VERSION
+function usage(string $message): void {
+	printLn("     install: $message");
+	printLn("       usage: install [-y|--yes] [-c|--channel=channel]");
+	printLn("");
+	printLn("     options:");
+	printLn("    -y|--yes: non-interactive mode");
+	printLn("-c|--channel: allows you to specify which channel you wish to install from. defaults to 'master'");
+	printLn("");
+	exit(1);
 }
 
-localVersion() {
-	local VERSION=`cat $1/VERSION`
-	local REVISION=`cat $1/REVISION`
-	echo "$VERSION.$REVISION"
+function error(string $message): void {
+	printLn("fatal error: $message");
+	cleanup();
+	exit(1);
 }
 
-onlineVersion() {
-	local VERSION=`curl $1/VERSION`
-	local REVISION=`curl $1/REVISION`
-	echo "$VERSION.$REVISION"
+function cleanup(): void {
+	printLn("Cleaning up...");
+	removeDirectory(MANGO_TEMP_PATH);
 }
 
-needsUpdate() {
-	if [ -f "$1" ]; then
-		local LOCAL_VERSION=$(localVersion "$1")
-		local ONLINE_VERSION=$(onlineVersion "$2/mango")
-		local CMP=(vercmp $LOCAL_VERSION $ONLINE_VERSION)
-		if [ CMP == 0 ]; then 
-			return 1
-		elif [ CMP == 1 ]; then
-			return 1
-		else
-			return 0
-		fi
-	else
-		return 0
-	fi
+function removeDirectory(string $path): void {
+	$dir = scandir($path);
+	foreach ($dir as $f) {
+		if ($f != '.' && $f != '..') {
+			$fullPath = "$path/$f";
+			if (is_dir($fullPath)) {
+				removeDirectory($fullPath);
+			} else {
+				unlink($fullPath);
+			}
+		}
+	}
+	rmdir($path);
 }
 
-proceed() {
-	if [ $2 = true ]; then
-		return 0
-	else
-		while true; do
-			read -p "$1 [Y/n] " yn
-			case $yn in
-				[Nn]* ) return 1;;
-				* ) return 0;;
-			esac
-		done
-	fi
+function copyDirectory(string $source, string $destination): void {
+	if (!file_exists($destination)) {
+		mkdir($destination);
+	}
+	$dir = scandir($source);
+	foreach ($dir as $f) {
+		if ($f != '.' && $f != '..') {
+			$sourcePath = "$source/$f";
+			$destinationPath = "$destination/$f";
+			if (is_dir($sourcePath)) {
+				copyDirectory($sourcePath, $destinationPath);
+			} else {
+				copy($sourcePath, $destinationPath);
+			}
+		}
+	}
 }
 
-usage() {
-	echo "install: $1"
-	echo "  usage: install [-y] [channel]"
-	echo ""
-	echo "     -y: non-interactive mode, does not ask for confirmation before proceeding"
-	echo "channel: the channel you wish to install mango from. Defaults to 'master'. Possible values could be 'beta' or 'development'"
-	echo ""
+function proceed(string $message, bool $skip = false): bool {
+	if (!$skip) {
+		printf("%s [Y/n] ", $message);
+		$stdin = fopen('php://stdin', 'r');
+		$input = trim(fgets($stdin));
+		if ($input == 'n') {
+			return false;
+		} else {
+			return true;
+		}
+	} else {
+		return true;
+	}
 }
 
-# parse command line arguments
-NON_INTERACTIVE_MODE=false
-CHANNEL="master"
-while getopts ":y" opt; do
-	case $opt in
-		y)
-			NON_INTERACTIVE_MODE=true
-		;;
-		/?)
-			usage "Invalid option: -$OPTARG"
-			exit 1
-		;;
-		--) 
-			break
-		;;
-	esac
-done
-shift $((OPTIND-1))
-[ "$1" = "--" ] && shift
-channel_op=($@)
-if [ "$channel_op" != "" ]; then
-	CHANNEL="$channel_op"
-fi
+function downloadFile(string $url, string $path): bool {
+	$written = file_put_contents($path, fopen($url, 'r'));
+	return ($written !== false); 
+}
 
-# define installation variables
-MANGO_SOURCE="https://github.com/jaderfeijo/mango-framework/archive/$CHANNEL.zip"
-MANGO_SOURCE_RAW="https://raw.githubusercontent.com/jaderfeijo/mango-framework/$CHANNEL"
-MANGO_INSTALL_PATH="/usr/lib/mango"
-MANGO_BINARY_PATH="/usr/bin/mango"
-MANGO_LIBRARY_FOLDER="library"
-MANGO_TEMP_PATH="/var/tmp/mango"
+// parse command line arguments
+$NON_INTERACTIVE_MODE = false;
+$CHANNEL = 'master';
+$opts = getopt('yc:', array('yes', 'channel:'));
+foreach (array_keys($opts) as $opt) {
+	if ($opt == 'y' || $opt == 'yes') {
+		$NON_INTERACTIVE_MODE = true;
+	} else if ($opt == 'c' || $opt == 'channel') {
+		$CHANNEL = $opts[$opt];
+	} else {
+		usage("Unknown argument: $opt");
+	}
+}
 
-# begin installation
-if [ $NON_INTERACTIVE_MODE = false ]; then
-	echo "===================================================================="
-	echo "Mango Framework Installer"
-	echo "===================================================================="
-	echo "This script will install the '$CHANNEL' version of the"
-	echo "Mango Framework in the following paths:"
-	echo ""
-	echo " $MANGO_INSTALL_PATH"
-	echo " $MANGO_BINARY_PATH"
-	echo ""
-fi
+// define installation variables
+$MANGO_SOURCE = "https://github.com/jaderfeijo/mango-framework/archive/$CHANNEL.zip";
+$MANGO_SOURCE_RAW = "https://raw.githubusercontent.com/jaderfeijo/mango-framework/$CHANNEL";
 
-# proceed confirmation
-if proceed "Do you wish to proceed with the installation?" "$NON_INTERACTIVE_MODE"; then
-	echo "* Checking currently installed version..."
-	if needsUpdate "$MANGO_INSTALL_PATH" "$MANGO_SOURCE_RAW/mango"; then
-		echo "* Downloading the latest framework..."
-		mkdir "$MANGO_TEMP_PATH"
-		curl -L "$MANGO_SOURCE" > "$MANGO_TEMP_PATH/mango-$CHANNEL.zip"
-		unzip "$MANGO_TEMP_PATH/mango-$CHANNEL.zip" -d "$MANGO_TEMP_PATH"
-		LOCAL_MANGO_PATH="$MANGO_TEMP_PATH/mango-framework-$CHANNEL/mango"
+// begin installation
+if (!$NON_INTERACTIVE_MODE) {
+	printLn("====================================================================");
+	printLn("Mango Framework Installer");
+	printLn("====================================================================");
+	printLn("This script will install the '$CHANNEL' version of the");
+	printLn("Mango Framework in the following paths:");
+	printLn("");
+	printLn(" ".MANGO_INSTALL_PATH);
+	printLn(" ".MANGO_BINARY_PATH);
+	printLn("");
+}
+
+// proceed confirmation
+if (proceed('Do you wish to proceed with the installation?', $NON_INTERACTIVE_MODE)) {
+	// check if we already have the files required to install
+	$LOCAL_MANGO_PATH = null;
+	if (file_exists(MANGO_FRAMEWORK_FOLDER)) {
+		$LOCAL_MANGO_PATH = MANGO_FRAMEWORK_FOLDER;
+	}
+
+	// download the installation files if necessary
+	if ($LOCAL_MANGO_PATH == null) {
+		printLn("* Downloading the latest version of the framework from '$CHANNEL'...");
+		if (!file_exists(MANGO_TEMP_PATH)) {
+			if (!mkdir(MANGO_TEMP_PATH)) {
+				error("failed to create mango temporary path at '".MANGO_TEMP_PATH."'");
+			}
+		}
 		
-		echo "* Installing latest framework version..."
-		if [ ! -d "$MANGO_INSTALL_PATH" ]; then
-			mkdir "$MANGO_INSTALL_PATH"
-		fi
-		if [ ! -d "$MANGO_INSTALL_PATH/$MANGO_LIBRARY_FOLDER" ]; then
-			mkdir "$MANGO_INSTALL_PATH/$MANGO_LIBRARY_FOLDER"
-		fi
-		cp -rf "$LOCAL_MANGO_PATH/*" "$MANGO_INSTALL_PATa"
-		if [ ! -f "$MANGO_BINARY_PATH" ]; then
-			ln -s "$MANGO_INSTALL_PATH/tools/mango" "$MANGO_BINARY_PATH"
-		fi
-		
-		echo "* Cleaning up..."
-		rm -r "$MANGO_TEMP_PATH"
-		
-		echo "===================================================================="
-		echo "All done :-)"
-		echo "===================================================================="
-		echo "You can now use the 'mango' command:"
-		echo ""
-		echo " $ mango info"
-		echo ""
-		echo "If everything went well, the current version of the mango"
-		echo "framework will be printed to the console"
-		echo ""
-		echo "Have fun!"
-		echo ""
-		echo "If you find this software useful please don't forget to donate!"
-		echo ""
-		echo "Bitcoin: 14j8rsDX238cxTgcW9EBDFK6eY43WA2P9V"
-		echo "PayPal: jader.feijo@gmail.com"
-		echo ""
-		echo "Thank you for using Mango Framework!"
-		echo ""
-	else
-		echo "Currently installed version is up to date!"
-	fi
-else
-	echo "Aborted!"
-fi
+		$package = MANGO_TEMP_PATH."/mango-$CHANNEL.zip";
+		if (downloadFile($MANGO_SOURCE, $package)) {
+			printLn("* Extracting downloaded package...");
+			$outputFolder = $MANGO_TEMP_PATH.'/mango-framework-'.$CHANNEL;
+			if (ZipArchive::extractTo($outputFolder)) {
+				$LOCAL_MANGO_PATH = $outputFolder.'/'.MANGO_FRAMEWORK_FOLDER;
+			} else {
+				error("failed to extract package");
+			}
+		} else {
+			error("failed to download package");
+		}
+	}
 
+	// install the framework
+	if (file_exists($LOCAL_MANGO_PATH)) {
+		$frameworkPath = MANGO_INSTALL_PATH.'/'.MANGO_FRAMEWORK_FOLDER;
+		if (file_exists($frameworkPath)) {
+			printLn("* Removing previous version of the framework...");
+			removeDirectory($frameworkPath);
+		}
+
+		printLn("* Installing latest version of the framework...");
+		if (!file_exists($frameworkPath)) {
+			if (!mkdir($frameworkPath)) {
+				error("failed to create framework folder at '".$frameworkPath."'");
+			}
+		}
+
+		copyDirectory($LOCAL_MANGO_PATH, $frameworkPath);
+		
+		$libraryPath = MANGO_INSTALL_PATH."/".MANGO_LIBRARY_FOLDER;
+		if (!file_exists($libraryPath)) {
+			printLn("* Creating library folder...");
+			if (!mkdir($libraryPath)) {
+				error("failed to create mango library folder at '".$libraryPath."'");
+			}
+		}
+		
+		if (!file_exists(MANGO_BINARY_PATH)) {
+			$linkTarget = $frameworkPath.'/tools/mango';
+			printLn("* Creating mango symbolic link at '".$linkTarget."'...");
+			if (!symlink($linkTarget, MANGO_BINARY_PATH)) {
+				error("failed to create symbolc link at '".$linkTarget."'");
+			}
+		}
+
+		cleanup();
+	} else {
+		error("The installation files could not be found!");
+	}
+} else {
+	printLn("Aborting...");
+}

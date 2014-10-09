@@ -76,5 +76,5 @@ sudo ln -s /usr/lib/mango/tools/mango /usr/bin/mango
 
 # finish up
 echo '****************** Finishing up ******************'
-sudo echo 'cd /usr/lib/mango' >> /home/vagrant/.bashrc
+sudo echo 'cd /vagrant' >> /home/vagrant/.bashrc
 echo "All done!"
