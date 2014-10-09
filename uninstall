@@ -25,18 +25,20 @@ function error(string $message): void {
 }
 
 function removeDirectory(string $path): void {
-	$dir = scandir($path);
-	foreach ($dir as $f) {
-		if ($f != '.' && $f != '..') {
-			$fullPath = "$path/$f";
-			if (is_dir($fullPath)) {
-				removeDirectory($fullPath);
-			} else {
-				unlink($fullPath);
+	if (file_exists($path)) {
+		$dir = scandir($path);
+		foreach ($dir as $f) {
+			if ($f != '.' && $f != '..') {
+				$fullPath = "$path/$f";
+				if (is_dir($fullPath)) {
+					removeDirectory($fullPath);
+				} else {
+					unlink($fullPath);
+				}
 			}
 		}
+		rmdir($path);
 	}
-	rmdir($path);
 }
 
 function proceed(string $message, bool $skip = false): bool {

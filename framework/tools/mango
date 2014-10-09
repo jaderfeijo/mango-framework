@@ -1,0 +1,12 @@
+#!/usr/bin/hhvm
+<?hh
+
+require_once('autoloader.hh');
+
+$cmd = end(explode('/', @$argv[0]));
+$args = array_slice(@$argv, 1, count(@$argv) - 1);
+
+$mango = new MangoCommand();
+
+die($mango->run(new Vector($args)));
+
