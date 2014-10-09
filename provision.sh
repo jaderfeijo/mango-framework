@@ -71,7 +71,8 @@ sudo git clone git://github.com/hhvm/vim-hack.git
 
 # setup mango-framework
 echo '****************** Setting up Mango-Framework  ******************'
-sudo /vagrant/install -y
+cd /vagrant
+sudo ./install -y
 
 # finish up
 echo '****************** Finishing up ******************'
