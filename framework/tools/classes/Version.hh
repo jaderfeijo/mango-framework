@@ -7,10 +7,16 @@ class Version {
 		return new Version((int)@$version[0], (int)@$version[1], (int)@$version[2]);
 	}
 
-	public static function parseFromFilesInPath(string $path): Version {
-		$VERSION = file_get_contents($path.'/VERSION');
-		$REVISION = file_get_contents($path.'/REVISION');
-		return self::parse("$VERSION.$REVISION");
+	public static function parseFromFilesInPath(string $path): ?Version {
+		$versionFile = $path.'/VERSION';
+		$revisionFile = $path.'/REVISION';
+		if (file_exists($versionFile) && file_exists($revisionFile)) {
+			$VERSION = file_get_contents($versionFile);
+			$REVISION = file_get_contents($revisionFile);
+			return self::parse("$VERSION.$REVISION");
+		} else {
+			return null;
+		}
 	}
 
 	private int $_major;

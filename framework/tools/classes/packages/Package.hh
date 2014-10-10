@@ -2,17 +2,32 @@
 
 class Package {
 
+	public static function parse(Source $source, string $package): ?Package {
+		$s = explode(' ', $package);
+		if (count($s) >= 3) {
+			return new Package($source, $s[0], $s[1], $s[2]);
+		} else {
+			return null;
+		}
+	}
+	
+	protected Source $_source;
 	protected string $_name;
 	protected string $_channel;
-	protected string $_sourceURL;
+	protected string $_url;
 
-	public function __construct(string $name, string $channel, string $sourceURL) {
+	public function __construct(Source $source, string $name, string $channel, string $url) {
+		$this->_source = $source;
 		$this->_name = $name;
 		$this->_channel = $channel;
-		$this->_sourceURL = $sourceURL;
+		$this->_url = $url;
 	}
 
 	/******************* Properties *******************/
+
+	public function source(): Source {
+		return $this->_source;
+	}
 
 	public function name(): string {
 		return $this->_name;
@@ -22,28 +37,36 @@ class Package {
 		return $this->_channel;
 	}
 
-	public function sourceURL(): string {
-		return $this->_sourceURL;
+	public function url(): string {
+		return $this->_url;
 	}
 
 	/***************** Dynamic Properties ***************/
 
 	public function archiveURL(): string {
-		return str_replace('{CHANNEL}', $this->channel(), $this->sourceURL());
+		return str_replace('{CHANNEL}', $this->channel(), $this->url());
+	}
+
+	public function archivePath(): string {
+		return $this->source()->cachesPath().'/'.$this->name().'.zip';
+	}
+
+	public function path(): string {
+		return MangoSystem::system()->libraryHome().'/'.$this->name();
 	}
 
 	public function isInstalled(): bool {
-		return false;
+		return file_exists($this->path());
 	}
 
-	/***************** Methods ****************/
+	/**************** Methods *****************/
 
 	public function install(): void {
-		//
-	}
-
-	public function update(): void {
-		//
+		if (FileManager::downloadFile($this->archiveURL(), $this->archivePath())) {
+			
+		} else {
+			//
+		}
 	}
 
 	public function uninstall(): void {

@@ -7,7 +7,7 @@ class MangoInfoCommand extends Command {
 	}
 	
 	public function execute(Vector<string> $args): int {
-		Console::stdout()->printLn('Mango-Framework Version: '.(string)MangoSystem::system()->version());
+		Console::stdout()->printLn('Installed Version: '.(string)MangoSystem::system()->version());
 		return 0;
 	}
 	

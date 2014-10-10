@@ -1,4 +1,4 @@
-<?hh
+<?php
 	
 /*
  * Copyright (c) 2011 Movinpixel Ltd. All rights reserved.

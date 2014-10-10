@@ -1,4 +1,4 @@
-<?hh
+<?php
 	
 /**
  * This file contains various different Mango constants
@@ -20,3 +20,4 @@ define('M_LIBRARY_FOLDER_NAME', 'library');
  * The Mango system library name
  */
 define('M_MANGO_SYSTEM_LIBRARY_NAME', 'mangoSystemLib');
+
