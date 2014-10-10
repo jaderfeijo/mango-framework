@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class FileManager {
 
@@ -18,6 +18,17 @@ class FileManager {
 		curl_close($curl);
 		fclose($curl);
 		return $success;
+	}
+	
+	public static function extractPackage(string $package, string $output): bool {
+		$archive = new ZipArchive();
+		if ($archive->open($package)) {
+			$archive->extractTo($output);
+			$archive->close();
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public function __construct() {

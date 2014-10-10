@@ -92,9 +92,17 @@ class Version {
 	public function isSmallerThanOrEqualTo(Version $version): bool {
 		return ($this->isSmallerThan($version) || $this->isEqualTo($version));
 	}
-	
+
+	public function shortVersionString(): string {
+		return $this->major().'.'.$this->minor();
+	}
+
+	public function fullVersionString(): string {
+		return $this->shortVersionString().'.'.$this->revision();
+	}
+
 	public function __toString(): string {
-		return $this->major().'.'.$this->minor().'.'.$this->revision();
+		return $this->fullVersionString();
 	}
 
 }
