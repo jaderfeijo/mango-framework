@@ -50,12 +50,11 @@ sudo apt-get install -y vim
 echo '****************** Installing codeschool theme ******************'
 sudo mkdir -p /home/vagrant/.vim/colors
 sudo curl https://raw.githubusercontent.com/29decibel/codeschool-vim-theme/master/colors/codeschool.vim > /home/vagrant/.vim/colors/codeschool.vim
-sudo echo 'syntax on' >> /home/vagrant/.vimrc
-sudo echo 'set nowrap' >> /home/vagrant/.vimrc
-sudo echo 'set nu' >> /home/vagrant/.vimrc
-sudo echo 'set tabstop=4' >> /home/vagrant/.vimrc
+sudo echo 'syntax on' >> /usr/share/vim/vimrc
+sudo echo 'set nowrap' >> /usr/share/vim/vimrc
+sudo echo 'set nu' >> /user/share/vim/vimrc
+sudo echo 'set tabstop=4' >> /usr/share/vim/vimrc
 sudo echo 'colorscheme codeschool' >> /home/vagrant/.vimrc
-sudo echo 'filetype plugin indent on' >> /home/vagrant/.vimrc
 
 # install pathogen.vim
 echo '****************** Installing pathogen ******************'
