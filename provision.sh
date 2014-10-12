@@ -55,6 +55,7 @@ sudo echo 'set nowrap' >> /usr/share/vim/vimrc
 sudo echo 'set nu' >> /user/share/vim/vimrc
 sudo echo 'set tabstop=4' >> /usr/share/vim/vimrc
 sudo echo 'colorscheme codeschool' >> /home/vagrant/.vimrc
+sudo echo 'filetype plugin indent on' >> /home/vagrant/.vimrc
 
 # install pathogen.vim
 echo '****************** Installing pathogen ******************'
