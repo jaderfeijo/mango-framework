@@ -198,9 +198,9 @@ if (proceed('Do you wish to proceed with the installation?', $NON_INTERACTIVE_MO
 		
 		if (!file_exists(MANGO_BINARY_PATH)) {
 			$linkTarget = $frameworkPath.'/tools/mango';
-			printLn("* Creating mango symbolic link at '".$linkTarget."'...");
+			printLn("* Creating mango symbolic link at '".MANGO_BINARY_PATH."'...");
 			if (!symlink($linkTarget, MANGO_BINARY_PATH)) {
-				error("failed to create symbolc link at '".$linkTarget."'");
+				error("failed to create symbolc link at '".MANGO_BINARY_PATH."'");
 			}
 		}
 
