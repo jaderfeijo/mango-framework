@@ -30,6 +30,39 @@ class FileManager {
 			return false;
 		}
 	}
+	public static function copyDirectory(string $source, string $destination): void {
+		if (!file_exists($destination)) {
+			mkdir($destination, 0777, true);
+		}
+		$dir = scandir($source);
+		foreach ($dir as $f) {
+			if ($f != '.' && $f != '..') {
+				$sourcePath = "$source/$f";
+				$destinationPath = "$destination/$f";
+				if (is_dir($sourcePath)) {
+					FileManager::copyDirectory($sourcePath, $destinationPath);
+				} else {
+					copy($sourcePath, $destinationPath);
+				}
+			}
+		}
+	}
+	public static function removeDirectory(string $path): void {
+		if (file_exists($path)) {
+			$dir = scandir($path);
+			foreach ($dir as $f) {
+				if ($f != '.' && $f != '..') {
+					$fullPath = "$path/$f";
+					if (is_dir($fullPath)) {
+						FileManager::removeDirectory($fullPath);
+					} else {
+						unlink($fullPath);
+					}
+				}
+			}
+			rmdir($dir);
+		}
+	}
 
 	public function __construct() {
 		//
