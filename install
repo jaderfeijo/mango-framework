@@ -30,7 +30,7 @@ function error(string $message): void {
 }
 
 function cleanup(): void {
-	printLn("Cleaning up...");
+	printLn("* Cleaning up...");
 	removeDirectory(MANGO_TEMP_PATH);
 }
 
@@ -204,7 +204,12 @@ if (proceed('Do you wish to proceed with the installation?', $NON_INTERACTIVE_MO
 			}
 		}
 
+		printLn("* Installing latest version of 'mangoSystemLib'...");
+		shell_exec('mango library install mangoSystemLib');
+
 		cleanup();
+
+		printLn("* All done!");
 	} else {
 		error("The installation files could not be found!");
 	}
