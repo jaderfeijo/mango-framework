@@ -42,7 +42,7 @@ Installing Mango
 ------------------------------------
 
 Once all the dependencies have been installed, installing Mango itself is easy!
-Simply open a new Terminal window and type in the following:
+Simply copy and paste the command below inside a Terminal window and press enter:
 
  `$ curl -L https://github.com/jaderfeijo/mango-framework/raw/master/install | sudo hhvm -v Hack.Lang.LookForTypechecker=0 /dev/stdin -y`
 
@@ -58,7 +58,7 @@ demonstrated below:
 Uninstalling
 ------------------------------------
 
-To uninstall mango simply type:
+To uninstall mango simply copy and paste this into your terminal:
 
  `$ curl -L https://github.com/jaderfeijo/mango-framework/raw/master/uninstall | sudo hhvm -v Hack.Lang.LookForTypechecker=0 /dev/stdin -y`
 
