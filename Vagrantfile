@@ -15,9 +15,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "chef/debian-7.6"
   
-  # Forward ports
-  config.vm.network :forwarded_port, host: 8080, guest: 80
-
   # Provision the machine
   config.vm.provision :shell, path: "provision.sh"
 

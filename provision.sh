@@ -6,10 +6,6 @@ sudo apt-get update
 sudo apt-get install -y unzip git curl wget build-essential
 sudo apt-get install -y python-software-properties --force-yes
 
-# install nginx
-echo '****************** Installing nginx ******************'
-sudo apt-get install -y nginx
-
 # install hhvm
 echo '****************** Installing hhvm ******************'
 sudo add-apt-repository -y ppa:mapnik/boost
@@ -20,26 +16,7 @@ sudo apt-get install -y libmemcached-dev
 sudo apt-get install -y --force-yes hhvm
 sudo /usr/share/hhvm/install_fastcgi.sh
 sudo /etc/init.d/hhvm restart
-sudo /etc/init.d/nginx restart
 sudo update-rc.d hhvm defaults
-cat <<EOM > /etc/nginx/sites-available/hhvm.conf
-server {
-  server_name hhvm.dev;
-
-  root /var/www;
-  index index.php;
-
-  location ~ \.(hh|php)$ {
-    fastcgi_pass 127.0.0.1:9000;
-    fastcgi_index index.php;
-    fastcgi_param SCRIPT_FILENAME /var/www$fastcgi_script_name;
-    include fastcgi_params;
-  }
-}
-EOM
-sudo rm /etc/nginx/sites-enabled/*
-sudo ln -s /etc/nginx/sites-available/hhvm.conf /etc/nginx/sites-enabled/hhvm.conf
-sudo service nginx restart
 
 # install vim
 echo '****************** Installing vim ******************'
