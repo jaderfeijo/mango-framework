@@ -204,9 +204,6 @@ if (proceed('Do you wish to proceed with the installation?', $NON_INTERACTIVE_MO
 			}
 		}
 
-		printLn("* Installing latest version of 'mangoSystemLib'...");
-		shell_exec('mango library install mangoSystemLib');
-
 		cleanup();
 
 		printLn("* All done!");

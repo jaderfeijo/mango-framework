@@ -55,6 +55,11 @@ demonstrated below:
 
  `$ curl -L https://github.com/jaderfeijo/mango-framework/raw/master/install | sudo hhvm -v Hack.Lang.LookForTypechecker=0 /dev/stdin -y -c development`
 
+After installing `mango` you will probably want to install the `mangoSystemLib` library
+as well:
+
+ `$ mango library install mangoSystemLib`
+
 Uninstalling
 ------------------------------------
 
