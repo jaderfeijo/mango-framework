@@ -48,6 +48,22 @@ class Source {
 	}
 
 	public function packages(): Vector<Package> {
+		if ($this->_packages->isEmpty()) {
+			if ($this->isCached()) {
+				$this->_packages->clear();
+				$file = new File($this->packagesPath(), File::READ_MODE);
+				while (!$file->eof()) {
+					$line = $file->readLine();
+					if ($line !== null) {
+						$package = Package::parse($this, $line);
+						if ($package !== null) {
+							$this->_packages->add($package);
+						}
+					}	
+				}
+				$file->close();
+			}
+		}
 		return $this->_packages;
 	}
 
@@ -55,19 +71,15 @@ class Source {
 
 	public function fetch(): void {
 		if (!$this->isCached()) {
-			if (FileManager::downloadFile($this->url(), $this->packagesPath())) {
-				$this->packages()->clear();
-	
-				$file = fopen($this->packagesPath(), 'r');
-				while (!feof($file)) {
-					$package = Package::parse($this, fgets($file));
-					if ($package != null) {
-						$this->packages()->add($package);
-					}
-				}
-			} else {
-				throw new Exception("Failed to fetch packages for source '".$this->name()."' from URL '".$this->url()."'");
-			}
+			FileManager::downloadFile($this->url(), $this->packagesPath());
+			$this->packages()->clear();
+		}
+	}
+
+	public function clearCache(): void {
+		if ($this->isCached()) {
+			FileManager::removeFile($this->packagesPath());
+			$this->packages()->clear();
 		}
 	}
 

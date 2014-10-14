@@ -61,7 +61,9 @@ class Library {
 		return Library::pathForLibrary($this->name(), $version);
 	}
 
-	protected function updateSymbolicLinks(): void {
+	/******************** Methods ********************/
+	
+	public function updateSymbolicLinks(): void {
 		$highestVersion = null;
 		foreach ($this->installedVersions() as $version) {
 			if ($highestVersion != null) {
@@ -92,8 +94,6 @@ class Library {
 			}
 		}
 	}
-
-	/******************** Methods ********************/
 
 	public function isVersionInstalled(Version $version): bool {
 		foreach ($this->installedVersions() as $v) {

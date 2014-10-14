@@ -31,6 +31,11 @@ class Console {
 		}
 		return 1;
 	}
+
+	public function printException(Exception $exception): void {
+		$this->printLn("An exception occured:");
+		$this->printLn((string)$exception);
+	}
 	
 	public function printWarning(string $warning): void {
 		$this->printLn("Warning: $warning");

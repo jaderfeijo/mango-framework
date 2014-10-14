@@ -2,9 +2,12 @@
 
 class PackageManager {
 	
-	protected static PackageManager $_sharedManager = new PackageManager();
+	protected static ?PackageManager $_sharedManager = null;
 
 	public static function sharedManager(): PackageManager {
+		if (self::$_sharedManager == null) {
+			self::$_sharedManager = new PackageManager();
+		}	
 		return self::$_sharedManager;
 	}
 	
@@ -36,14 +39,35 @@ class PackageManager {
 
 	public function sources(): Vector<Source> {
 		if ($this->_sources->isEmpty()) {
-			$this->loadSources();
+			$this->_sources->clear();	
+			$file = fopen($this->sourcesPath(), 'r');
+			while (!feof($file)) {
+				$line = fgets($file);
+				if ($line !== false) {
+					$source = Source::parse($line);
+					if ($source != null) {
+						$this->_sources->add($source);
+					}
+				}
+			}
+			fclose($file);
 		}	
 		return $this->_sources;
 	}
 
 	public function libraries(): Vector<Library> {
 		if ($this->_libraries->isEmpty()) {
-			$this->loadLibraries();
+			$this->_libraries->clear();
+			$dir = scandir(MangoSystem::system()->libraryHome());
+			foreach ($dir as $f) {
+				if ($f != '.' && $f != '..') {
+					$path = MangoSystem::system()->libraryHome().'/'.$f;
+					if (is_dir($path)) {
+						$library = new Library($f);
+						$this->_libraries->add($library);
+					}
+				}
+			}
 		}
 		return $this->_libraries;
 	}
@@ -52,32 +76,6 @@ class PackageManager {
 
 	protected function sourcesPath(): string {
 		return MangoSystem::system()->frameworkHome().'/SOURCES';
-	}
-
-	protected function loadSources(): void {
-		$this->sources()->clear();	
-		$file = fopen($this->sourcesPath(), 'r');
-		while (!feof($file)) {
-			$source = Source::parse(fgets($file));
-			if ($source != null) {
-				$this->_sources->add($source);
-			}
-		}
-		fclose($file);
-	}
-
-	protected function loadLibraries(): void {
-		$this->libraries()->clear();
-		$dir = scandir(MangoSystem::system()->libraryHome());
-		foreach ($dir as $f) {
-			if ($f != '.' && $f != '..') {
-				$path = MangoSystem::system()->libraryHome().'/'.$f;
-				if (is_dir($path)) {
-					$library = new Library($f);
-					$this->libraries()->add($library);
-				}
-			}
-		}
 	}
 
 	protected function saveSources(): void {
@@ -116,6 +114,10 @@ class PackageManager {
 			}
 		}
 		return null;
+	}
+
+	public function clearCache(): void {
+		FileManager::removeDirectory($this->cachesPath());
 	}
 
 }

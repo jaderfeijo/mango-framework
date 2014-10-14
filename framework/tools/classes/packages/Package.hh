@@ -43,7 +43,7 @@ class Package {
 
 	/**************** Protected Methods *****************/
 
-	public function archiveURL(string $channel): string {
+	protected function archiveURL(string $channel): string {
 		return str_replace('{CHANNEL}', $channel, $this->url());
 	}
 
@@ -57,41 +57,76 @@ class Package {
 
 	/**************** Methods *****************/
 
-	public function install(?Version $version): void {
+	public function archiveURLForVersion(?Version $version): string {
 		$channel = $this->channel();
 		if ($version != null) {
 			$channel = $version->shortVersionString();
 		}
-		
-		$packagePath = $this->packagePath($channel);
-		$archivePath = $this->archivePath($channel);
-		$archiveURL = $this->archiveURL($channel);
+		return $this->archiveURL($channel);
+	}
 
-		if (!file_exists($packagePath)) {
-			if (!file_exists($archivePath)) {
-				if (!FileManager::downloadFile($archiveURL, $archivePath)) {
-					throw new Exception("Failed to download library package from '".$archiveURL."'");
-				}
-			}
-			
-			if (!FileManager::extractPackage($archivePath, $packagePath)) {
-				throw new Exception("Failed to extract library package from '".$archivePath."' to '".$packagePath."'");
-			}
+	public function archivePathForVersion(?Version $version): string {
+		$channel = $this->channel();
+		if ($version != null) {
+			$channel = $version->shortVersionString();
 		}
-		
-		$packageVersion = Version::parseFromFilesInPath($packagePath);
-		if ($packageVersion != null) {
-			$library = PackageManager::sharedManager()->libraryNamed($this->name());
-			if ($library != null) {
-				if ($library->isVersionInstalled($packageVersion)) {
-					$library->uninstall($packageVersion);
-				}
-			}
+		return $this->archivePath($channel);
+	}
 
-			$libraryPath = Library::pathForLibrary($this->name(), $packageVersion);
-			FileManager::copyDirectory($packagePath, $libraryPath);
+	public function packagePathForVersion(?Version $version): string {
+		$channel = $this->channel();
+		if ($version != null) {
+			$channel = $version->shortVersionString();
+		}
+		return $this->packagePath($channel);
+	}
+
+	public function hasArchiveForVersion(?Version $version): bool {
+		return file_exists($this->archivePathForVersion($version));
+	}
+
+	public function hasPackageForVersion(?Version $version): bool {
+		return file_exists($this->packagePathForVersion($version));
+	}
+
+	public function fetch(?Version $version): void {
+		if (!$this->hasArchiveForVersion($version)) {
+			FileManager::downloadFile($this->archiveURLForVersion($version), $this->archivePathForVersion($version));
+		}
+	}
+
+	public function extract(?Version $version): void {
+		if (!$this->hasPackageForVersion($version)) {
+			FileManager::extractPackage($this->archivePathForVersion($version), $this->source()->cachesPath());
+		}
+	}
+
+	public function install(?Version $version): void {
+		$packagePath = $this->packagePathForVersion($version);
+		if (file_exists($packagePath)) {
+			$packageVersion = Version::parseFromFilesInPath($packagePath);
+			if ($packageVersion != null) {
+				$library = PackageManager::sharedManager()->libraryNamed($this->name());
+				if ($library != null) {
+					if ($library->isVersionInstalled($packageVersion)) {
+						$library->uninstall($packageVersion);
+					}
+				}
+	
+				$libraryPath = Library::pathForLibrary($this->name(), $packageVersion);
+				FileManager::copyDirectory($packagePath, $libraryPath);
+
+				$library = PackageManager::sharedManager()->libraryNamed($this->name());
+				if ($library !== null) {
+					$library->updateSymbolicLinks();
+				} else {
+					throw new PackageException($this, PackageException::POST_INSTALLATION_ERROR);
+				}
+			} else {
+				throw new PackageException($this, PackageException::CORRUPTED_PACKAGE_ERROR);
+			}
 		} else {
-			throw new Exception("Package at '".$packagePath."' appears to be corrupted");
+			throw new PackageException($this, PackageException::PACKAGE_NOT_FOUND_ERROR);
 		}
 	}
 
