@@ -58,7 +58,7 @@ demonstrated below:
 After installing `mango` you will probably want to install the `mangoSystemLib` library
 as well:
 
- `$ mango library install mangoSystemLib`
+ `$ sudo mango library install mangoSystemLib`
 
 Uninstalling
 ------------------------------------
