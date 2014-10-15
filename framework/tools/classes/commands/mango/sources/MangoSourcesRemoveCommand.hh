@@ -6,7 +6,7 @@ class MangoSourcesRemoveCommand extends Command {
 		parent::__construct('remove', 'removes a source from the list of available sources', Vector {'url'});
 	}
 	
-	public function execute(Vector<string> $args): int {
+	public function execute(Vector<string> $args) : int {
 		return 0;
 	}
 	

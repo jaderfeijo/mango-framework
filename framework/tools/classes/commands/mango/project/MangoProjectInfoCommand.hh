@@ -6,7 +6,7 @@ class MangoProjectInfoCommand extends Command {
 		parent::__construct('info', 'provides information about the current mango project');
 	}
 	
-	public function execute(Vector<string> $args): int {
+	public function execute(Vector<string> $args) : int {
 		return 0;
 	}
 	

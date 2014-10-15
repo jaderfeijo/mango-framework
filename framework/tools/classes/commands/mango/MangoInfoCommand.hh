@@ -6,7 +6,7 @@ class MangoInfoCommand extends Command {
 		parent::__construct('info', 'provides information about the installed version of the mango framework');
 	}
 	
-	public function execute(Vector<string> $args): int {
+	public function execute(Vector<string> $args) : int {
 		Console::stdout()->printLn('Installed Version: '.(string)MangoSystem::system()->version());
 		return 0;
 	}

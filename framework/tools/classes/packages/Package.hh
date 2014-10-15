@@ -2,7 +2,7 @@
 
 class Package {
 
-	public static function parse(Source $source, string $package): ?Package {
+	public static function parse(Source $source, string $package) : ?Package {
 		$s = explode(' ', $package);
 		if (count($s) >= 3) {
 			return new Package($source, $s[0], $s[1], $s[2]);
@@ -25,39 +25,39 @@ class Package {
 
 	/******************* Properties *******************/
 
-	public function source(): Source {
+	public function source() : Source {
 		return $this->_source;
 	}
 
-	public function name(): string {
+	public function name() : string {
 		return $this->_name;
 	}
 
-	public function channel(): string {
+	public function channel() : string {
 		return $this->_channel;
 	}
 
-	public function url(): string {
+	public function url() : string {
 		return $this->_url;
 	}
 
 	/**************** Protected Methods *****************/
 
-	protected function archiveURL(string $channel): string {
+	protected function archiveURL(string $channel) : string {
 		return str_replace('{CHANNEL}', $channel, $this->url());
 	}
 
-	protected function archivePath(string $channel): string {
+	protected function archivePath(string $channel) : string {
 		return $this->source()->cachesPath().'/'.$this->name().'-'.$channel.'.zip';
 	}
 
-	protected function packagePath(string $channel): string {
+	protected function packagePath(string $channel) : string {
 		return $this->source()->cachesPath().'/'.$this->name().'-'.$channel;
 	}
 
 	/**************** Methods *****************/
 
-	public function archiveURLForVersion(?Version $version): string {
+	public function archiveURLForVersion(?Version $version) : string {
 		$channel = $this->channel();
 		if ($version != null) {
 			$channel = $version->shortVersionString();
@@ -65,7 +65,7 @@ class Package {
 		return $this->archiveURL($channel);
 	}
 
-	public function archivePathForVersion(?Version $version): string {
+	public function archivePathForVersion(?Version $version) : string {
 		$channel = $this->channel();
 		if ($version != null) {
 			$channel = $version->shortVersionString();
@@ -73,7 +73,7 @@ class Package {
 		return $this->archivePath($channel);
 	}
 
-	public function packagePathForVersion(?Version $version): string {
+	public function packagePathForVersion(?Version $version) : string {
 		$channel = $this->channel();
 		if ($version != null) {
 			$channel = $version->shortVersionString();
@@ -81,27 +81,27 @@ class Package {
 		return $this->packagePath($channel);
 	}
 
-	public function hasArchiveForVersion(?Version $version): bool {
+	public function hasArchiveForVersion(?Version $version) : bool {
 		return file_exists($this->archivePathForVersion($version));
 	}
 
-	public function hasPackageForVersion(?Version $version): bool {
+	public function hasPackageForVersion(?Version $version) : bool {
 		return file_exists($this->packagePathForVersion($version));
 	}
 
-	public function fetch(?Version $version): void {
+	public function fetch(?Version $version) : void {
 		if (!$this->hasArchiveForVersion($version)) {
 			FileManager::downloadFile($this->archiveURLForVersion($version), $this->archivePathForVersion($version));
 		}
 	}
 
-	public function extract(?Version $version): void {
+	public function extract(?Version $version) : void {
 		if (!$this->hasPackageForVersion($version)) {
 			FileManager::extractPackage($this->archivePathForVersion($version), $this->source()->cachesPath());
 		}
 	}
 
-	public function install(?Version $version): void {
+	public function install(?Version $version) : void {
 		$packagePath = $this->packagePathForVersion($version);
 		if (file_exists($packagePath)) {
 			$packageVersion = Version::parseFromFilesInPath($packagePath);
@@ -131,4 +131,3 @@ class Package {
 	}
 
 }
-

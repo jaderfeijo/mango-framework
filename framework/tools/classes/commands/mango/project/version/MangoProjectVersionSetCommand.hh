@@ -6,7 +6,7 @@ class MangoProjectVersionSetCommand extends Command {
 		parent::__construct('set', 'sets the current project version to the specified [version]', Vector {'version'});
 	}
 	
-	public function execute(Vector<string> $args): int {
+	public function execute(Vector<string> $args) : int {
 		return 0;
 	}
 	

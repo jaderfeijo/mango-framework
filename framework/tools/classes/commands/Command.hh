@@ -25,29 +25,29 @@ class Command {
 	
 	/******************* Properties *******************/
 	
-	public function name(): string {
+	public function name() : string {
 		return $this->_name;
 	}
 	
-	public function description(): ?string {
+	public function description() : ?string {
 		return $this->_description;
 	}
 		
-	public function requiredArguments(): ?Vector<string> {
+	public function requiredArguments() : ?Vector<string> {
 		return $this->_requiredArguments;
 	}
 	
-	public function optionalArguments(): ?Vector<string> {
+	public function optionalArguments() : ?Vector<string> {
 		return $this->_optionalArguments;
 	}
 	
-	public function parent(): ?Command {
+	public function parent() : ?Command {
 		return $this->_parent;
 	}
 
 	/******************* Dynamic Properties *******************/
 	
-	public function totalRequiredArguments(): int {
+	public function totalRequiredArguments() : int {
 		$requiredArguments = $this->requiredArguments();
 		if ($requiredArguments !== null) {
 			return $requiredArguments->count();
@@ -56,7 +56,7 @@ class Command {
 		}
 	}
 	
-	public function totalOptionalArguments(): int {
+	public function totalOptionalArguments() : int {
 		$optionalArguments = $this->optionalArguments();
 		if ($optionalArguments !== null) {
 			return $optionalArguments->count();
@@ -65,11 +65,11 @@ class Command {
 		}
 	}
 	
-	public function totalArguments(): int {
+	public function totalArguments() : int {
 		return $this->totalRequiredArguments() + $this->totalOptionalArguments();
 	}
 	
-	public function fullCommandString(): string {
+	public function fullCommandString() : string {
 		$parent = $this->parent();
 		if ($parent !== null) {
 			return $parent->fullCommandString().' '.$this->name();
@@ -78,7 +78,7 @@ class Command {
 		}
 	}
 
-	public function fullArgumentsString(): string {
+	public function fullArgumentsString() : string {
 		$args = '';
 		
 		$requiredArguments = $this->requiredArguments();	
@@ -98,19 +98,19 @@ class Command {
 		return $args;
 	}
 
-	public function usageString(): string {
+	public function usageString() : string {
 		return $this->fullCommandString().' '.$this->fullArgumentsString()."\n    ".$this->description();
 	}
 
 	/******************* Protected Methods *******************/
 	
-	protected function setParent(?Command $parent): void {
+	protected function setParent(?Command $parent) : void {
 		$this->_parent = $parent;
 	}
 	
 	/******************* Methods *******************/
 	
-	public function run(Vector<string> $args): int {
+	public function run(Vector<string> $args) : int {
 		if ($args->count() < $this->totalRequiredArguments()) {
 			return $this->usage(self::ERR_TOO_FEW_ARGUMENTS);
 		} else if ($args->count() > $this->totalArguments()) {
@@ -120,7 +120,7 @@ class Command {
 		}
 	}
 	
-	public function usage(int $errorCode): int {
+	public function usage(int $errorCode) : int {
 		$cmd = $this->fullCommandString();
 		$message = 'unknown parameters!';
 		
@@ -142,9 +142,8 @@ class Command {
 		return self::R_INVALID_PARAMETERS;
 	}
 	
-	public function execute(Vector<string> $args): int {
+	public function execute(Vector<string> $args) : int {
 		return $this->usage(self::ERR_COMMAND_NOT_IMPLEMENTED);
 	}
 
 }
-

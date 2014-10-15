@@ -6,11 +6,11 @@ class MangoUpdateCommand extends Command {
 		parent::__construct('update', 'updates the current version of the mango-framework using the specified {channel}', null, Vector {'channel'});
 	}
 
-	public function mangoOnlineSource(string $branch): string {
+	public function mangoOnlineSource(string $branch) : string {
 		return "https://github.com/jaderfeijo/mango-framework/archive/$branch.zip";
 	}
 
-	public function mangoOnlineVersion(string $branch): Version {
+	public function mangoOnlineVersion(string $branch) : Version {
 		$versionURL = "https://raw.githubusercontent.com/jaderfeijo/mango-framework/$branch/mango/VERSION";
 		$revisionURL = "https://raw.githubusercontent.com/jaderfeijo/mango-framework/$branch/mango/REVISION";
 		$versionString = $this->getContentsOfURL($versionURL);
@@ -18,7 +18,7 @@ class MangoUpdateCommand extends Command {
 		return Version::parse($versionString.'.'.$revisionString);
 	}
 
-	public function getContentsOfURL(string $url): string {
+	public function getContentsOfURL(string $url) : string {
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -27,7 +27,7 @@ class MangoUpdateCommand extends Command {
 		return $contents;
 	}
 
-	public function execute(Vector<string> $args): int {
+	public function execute(Vector<string> $args) : int {
 		$branch = 'master';
 		if ($args->count() > 0) $branch = $args[0];
 		$onlineSource = $this->mangoOnlineSource($branch);

@@ -6,7 +6,7 @@ class MangoLibraryListCommand extends Command {
 		parent::__construct('list', 'lists all installed libraries');
 	}
 	
-	public function execute(Vector<string> $args): int {
+	public function execute(Vector<string> $args) : int {
 		return 0;
 	}
 	

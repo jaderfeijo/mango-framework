@@ -20,4 +20,3 @@ class DirectoryException extends Exception {
 	}
 
 }
-

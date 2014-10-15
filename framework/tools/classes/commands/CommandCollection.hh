@@ -11,16 +11,16 @@ class CommandCollection extends Command {
 	
 	/******************* Properties *******************/
 	
-	public function commands(): Vector<Command> {
+	public function commands() : Vector<Command> {
 		return $this->_commands;
 	}
 	
-	public function addCommand(Command $command): void {
+	public function addCommand(Command $command) : void {
 		$this->commands()->add($command);
 		$command->setParent($this);
 	}
 	
-	public function removeCommand(Command $command): void {
+	public function removeCommand(Command $command) : void {
 		$index = $this->commands()->linearSearch($command);
 		if ($index >= 0) {
 			$this->commands()->removeKey($index);
@@ -29,7 +29,7 @@ class CommandCollection extends Command {
 	
 	/******************* Dynamic Properties *******************/
 	
-	public function executableCommands(): Vector<Command> {
+	public function executableCommands() : Vector<Command> {
 		$commands = new Vector(null);
 		foreach ($this->commands() as $command) {
 			if (!($command instanceof CommandCollection)) {
@@ -39,7 +39,7 @@ class CommandCollection extends Command {
 		return $commands;
 	}
 	
-	public function commandCollections(): Vector<CommandCollection> {
+	public function commandCollections() : Vector<CommandCollection> {
 		$commands = new Vector(null);
 		foreach ($this->commands() as $command) {
 			if ($command instanceof CommandCollection) {
@@ -51,7 +51,7 @@ class CommandCollection extends Command {
 	
 	/******************* Methods *******************/
 	
-	public function commandWithName(string $name): ?Command {
+	public function commandWithName(string $name) : ?Command {
 		foreach ($this->commands() as $command) {
 			if ($command->name() == $name) {
 				return $command;
@@ -62,7 +62,7 @@ class CommandCollection extends Command {
 	
 	/******************* Command Methods *******************/
 
-	public function usageString(): string {
+	public function usageString() : string {
 		$usage = $this->fullCommandString().' '.$this->fullArgumentsString()."\n";	
 		$commands = $this->commands();
 		if ($commands !== null) {
@@ -81,7 +81,7 @@ class CommandCollection extends Command {
 		return $usage;
 	}
 
-	public function run(Vector<string> $args): int {
+	public function run(Vector<string> $args) : int {
 		if ($args->count() <= 0) {
 			return $this->usage(self::ERR_TOO_FEW_ARGUMENTS);
 		} else {
@@ -89,7 +89,7 @@ class CommandCollection extends Command {
 		}
 	}
 
-	public function execute(Vector<string> $args): int {
+	public function execute(Vector<string> $args) : int {
 		$command = $this->commandWithName($args[0]);
 		if ($command === null) {
 			return $this->usage(self::ERR_COMMAND_NOT_FOUND);

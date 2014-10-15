@@ -5,14 +5,14 @@ define('AL_CLASS_EXTENSION', 'hh');
 
 spl_autoload_register('al_auto_load_class');
 
-function al_auto_load_class(string $class): void {
+function al_auto_load_class(string $class) : void {
 	$classPath = find_class_path($class);
 	if ($classPath !== null) {
 		include $classPath;
 	}
 }
 
-function find_class_path(string $className, ?string $path = null): ?string {
+function find_class_path(string $className, ?string $path = null) : ?string {
 	if ($path === null) $path = dirname(__FILE__).'/'.AL_CLASSES_FOLDER;
 
 	$dir = new DirectoryIterator($path);
@@ -36,4 +36,3 @@ function find_class_path(string $className, ?string $path = null): ?string {
 
 	return null;
 }
-

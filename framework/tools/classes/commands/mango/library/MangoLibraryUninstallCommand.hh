@@ -6,7 +6,7 @@ class MangoLibraryUninstallCommand extends Command {
 		parent::__construct('uninstall', 'uninstalls the specified {version} of a [library]', Vector {'library'}, Vector {'version'});
 	}
 	
-	public function execute(Vector<string> $args): int {
+	public function execute(Vector<string> $args) : int {
 		$libraryName = $args[0];
 		$version = null;
 		if ($args->count() > 1) {

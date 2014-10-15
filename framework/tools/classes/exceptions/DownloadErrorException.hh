@@ -20,4 +20,3 @@ class DownloadErrorException extends Exception {
 	}
 
 }
-

@@ -2,7 +2,7 @@
 
 class Library {
 
-	public static function pathForLibrary(string $name, ?Version $version): string {
+	public static function pathForLibrary(string $name, ?Version $version) : string {
 		if ($version != null) {
 			return MangoSystem::system()->libraryHome().'/'.$name.'/'.$version->shortVersionString();
 		} else {
@@ -18,21 +18,21 @@ class Library {
 
 	/****************** Properties ******************/
 
-	public function name(): string {
+	public function name() : string {
 		return $this->_name;
 	}
 
 	/***************** Dynamic Properties *********************/
 
-	public function path(): string {
+	public function path() : string {
 		return Library::pathForLibrary($this->name(), null);
 	}
 
-	public function isInstalled(): bool {
+	public function isInstalled() : bool {
 		return file_exists($this->path());
 	}
 
-	public function installedVersions(): Vector<Version> {
+	public function installedVersions() : Vector<Version> {
 		$installedVersions = new Vector(null);
 		if (file_exists($this->path())) {
 			$entries = scandir($this->path());
@@ -51,19 +51,19 @@ class Library {
 		return $installedVersions;
 	}
 
-	public function latestVersion(): ?Version {
+	public function latestVersion() : ?Version {
 		return Version::parseFromFilesInPath($this->path().'/latest');
 	}
 
 	/****************** Protected Methods ********************/
 
-	protected function pathForVersion(Version $version): string {
+	protected function pathForVersion(Version $version) : string {
 		return Library::pathForLibrary($this->name(), $version);
 	}
 
 	/******************** Methods ********************/
 	
-	public function updateSymbolicLinks(): void {
+	public function updateSymbolicLinks() : void {
 		$highestVersion = null;
 		foreach ($this->installedVersions() as $version) {
 			if ($highestVersion != null) {
@@ -95,7 +95,7 @@ class Library {
 		}
 	}
 
-	public function isVersionInstalled(Version $version): bool {
+	public function isVersionInstalled(Version $version) : bool {
 		foreach ($this->installedVersions() as $v) {
 			if ($version->shortVersionString() == $v->shortVersionString()) {
 				return true;
@@ -104,7 +104,7 @@ class Library {
 		return false;
 	}
 
-	public function uninstall(?Version $version): void {
+	public function uninstall(?Version $version) : void {
 		if ($version == null) {
 			FileManager::removeDirectory($this->path());
 		} else {
@@ -118,4 +118,3 @@ class Library {
 	}
 
 }
-

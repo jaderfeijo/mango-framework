@@ -6,7 +6,7 @@ class MangoLibraryInstallCommand extends Command {
 		parent::__construct('install', 'installs the specified [{source}:library] with the specified {version}', Vector {'source:library'}, Vector {'version'});
 	}
 	
-	public function execute(Vector<string> $args): int {
+	public function execute(Vector<string> $args) : int {
 		$sourceLibrary = new Vector(explode(':', $args[0]));
 		$sourceName = 'main';
 		$libraryName = null;
@@ -66,4 +66,3 @@ class MangoLibraryInstallCommand extends Command {
 	}
 	
 }
-

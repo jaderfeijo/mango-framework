@@ -6,7 +6,7 @@ class MangoSourcesListCommand extends Command {
 		parent::__construct('list', 'lists all available sources');
 	}
 	
-	public function execute(Vector<string> $args): int {
+	public function execute(Vector<string> $args) : int {
 		return 0;
 	}
 	

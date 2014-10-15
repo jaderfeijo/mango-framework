@@ -2,7 +2,7 @@
 
 class FileManager {
 
-	public static function downloadFile(string $url, string $path): void {		
+	public static function downloadFile(string $url, string $path) : void {
 		FileManager::createDirectory(dirname($path));
 		$file = fopen($path, 'w');
 		if ($file !== false) {
@@ -32,7 +32,7 @@ class FileManager {
 		}
 	}
 	
-	public static function extractPackage(string $package, string $output): void {
+	public static function extractPackage(string $package, string $output) : void {
 		$archive = new ZipArchive();
 		if (!$archive->open($package)) {
 			throw new ZipFileException($package, $output, ZipFileException::OPENING_ERROR);
@@ -45,7 +45,7 @@ class FileManager {
 		}
 	}
 
-	public static function copyDirectory(string $source, string $destination): void {
+	public static function copyDirectory(string $source, string $destination) : void {
 		if (!file_exists($destination)) {
 			FileManager::createDirectory($destination);
 		}
@@ -67,7 +67,7 @@ class FileManager {
 		}
 	}
 
-	public static function removeDirectory(string $path): void {
+	public static function removeDirectory(string $path) : void {
 		if (file_exists($path)) {
 			$dir = scandir($path);
 			if ($dir !== false) {
@@ -90,19 +90,19 @@ class FileManager {
 		}
 	}
 
-	public static function copyFile(string $source, string $destination): void {
+	public static function copyFile(string $source, string $destination) : void {
 		if (!copy($source, $destination)) {
 			throw new FileException("$source --> $destination", FileException::COPY_ERROR);
 		}
 	}
 
-	public static function removeFile(string $path): void {
+	public static function removeFile(string $path) : void {
 		if (!unlink($path)) {
 			throw new FileException($path, FileException::REMOVE_ERROR);
 		}
 	}
 
-	public static function createDirectory(string $path): void {
+	public static function createDirectory(string $path) : void {
 		if (!file_exists($path)) {
 			if (!mkdir($path, 0777, true)) {
 				throw new DirectoryException($path, DirectoryException::CREATE_ERROR);
@@ -111,4 +111,3 @@ class FileManager {
 	}
 
 }
-

@@ -26,17 +26,17 @@ class File {
 
 	/****************** Properties ******************/
 
-	public function path(): string {
+	public function path() : string {
 		return $this->_path;
 	}
 
-	public function fileResource(): ?resource {
+	public function fileResource() : ?resource {
 		return $this->_fileResource;
 	}
 
 	/****************** Methods ******************/
 
-	public function isOpen(): bool {
+	public function isOpen() : bool {
 		if ($this->fileResource() !== null) {
 			return true;
 		} else {
@@ -44,7 +44,7 @@ class File {
 		}
 	}
 
-	public function readLine(): ?string {
+	public function readLine() : ?string {
 		if ($this->isOpen()) {
 			$line = fgets($this->fileResource());
 			if ($line !== false) {
@@ -57,14 +57,14 @@ class File {
 		}
 	}
 
-	public function eof(): bool {
+	public function eof() : bool {
 		if (!$this->isOpen()) {
 			throw new FileException($this->path(), FileException::FILE_NOT_OPEN_ERROR);
 		}
 		return feof($this->fileResource());
 	}
 
-	public function close(): void {
+	public function close() : void {
 		if (!$this->isOpen()) {
 			throw new FileException($this->path(), FileException::FILE_NOT_OPEN_ERROR);
 		}
@@ -75,4 +75,3 @@ class File {
 	}
 
 }
-

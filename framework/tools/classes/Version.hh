@@ -2,7 +2,7 @@
 	
 class Version {
 
-	public static function parse(string $versionString): Version {
+	public static function parse(string $versionString) : Version {
 		$version = explode('.', $versionString);
 		return new Version((int)@$version[0], (int)@$version[1], (int)@$version[2]);
 	}
@@ -29,23 +29,23 @@ class Version {
 		$this->_revision = $revision;
 	}
 	
-	public function major(): int {
+	public function major() : int {
 		return $this->_major;
 	}
 	
-	public function minor(): int {
+	public function minor() : int {
 		return $this->_minor;
 	}
 	
-	public function revision(): int {
+	public function revision() : int {
 		return $this->_revision;
 	}
 	
-	public function isEqualTo(Version $version): bool {
+	public function isEqualTo(Version $version) : bool {
 		return ($this->major() == $version->major() && $this->minor() == $version->minor() && $this->revision() == $version->revision());
 	}
 	
-	public function isGreaterThan(Version $version): bool {
+	public function isGreaterThan(Version $version) : bool {
 		if ($this->major() > $version->major()) {
 			return true;
 		} else if ($this->major() < $version->major()) {
@@ -65,7 +65,7 @@ class Version {
 		}
 	}
 	
-	public function isSmallerThan(Version $version): bool {
+	public function isSmallerThan(Version $version) : bool {
 		if ($this->major() < $version->major()) {
 			return true;
 		} else if ($this->major() > $version->major()) {
@@ -85,23 +85,23 @@ class Version {
 		}
 	}
 	
-	public function isGreaterThanOrEqualTo(Version $version): bool {
+	public function isGreaterThanOrEqualTo(Version $version) : bool {
 		return ($this->isGreaterThan($version) || $this->isEqualTo($version));
 	}
 	
-	public function isSmallerThanOrEqualTo(Version $version): bool {
+	public function isSmallerThanOrEqualTo(Version $version) : bool {
 		return ($this->isSmallerThan($version) || $this->isEqualTo($version));
 	}
 
-	public function shortVersionString(): string {
+	public function shortVersionString() : string {
 		return $this->major().'.'.$this->minor();
 	}
 
-	public function fullVersionString(): string {
+	public function fullVersionString() : string {
 		return $this->shortVersionString().'.'.$this->revision();
 	}
 
-	public function __toString(): string {
+	public function __toString() : string {
 		return $this->fullVersionString();
 	}
 

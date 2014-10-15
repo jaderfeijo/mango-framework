@@ -2,7 +2,7 @@
 
 class Source {
 	
-	public static function parse(string $source): ?Source {
+	public static function parse(string $source) : ?Source {
 		$s = explode(' ', $source);
 		if (count($s) >= 2) {
 			return new Source($s[0], $s[1]);
@@ -25,29 +25,29 @@ class Source {
 
 	/****************** Properties *****************/
 
-	public function name(): string {
+	public function name() : string {
 		return $this->_name;
 	}
 
-	public function url(): string {
+	public function url() : string {
 		return $this->_url;
 	}
 
 	/****************** Dynamic Properties ********************/
 
-	public function cachesPath(): string {
+	public function cachesPath() : string {
 		return PackageManager::sharedManager()->cachesPath().'/sources/'.$this->name();
 	}
 
-	public function packagesPath(): string {
+	public function packagesPath() : string {
 		return $this->cachesPath().'/PACKAGES';
 	}
 
-	public function isCached(): bool {
+	public function isCached() : bool {
 		return file_exists($this->packagesPath());
 	}
 
-	public function packages(): Vector<Package> {
+	public function packages() : Vector<Package> {
 		if ($this->_packages->isEmpty()) {
 			if ($this->isCached()) {
 				$this->_packages->clear();
@@ -69,21 +69,21 @@ class Source {
 
 	/****************** Methods *******************/
 
-	public function fetch(): void {
+	public function fetch() : void {
 		if (!$this->isCached()) {
 			FileManager::downloadFile($this->url(), $this->packagesPath());
 			$this->packages()->clear();
 		}
 	}
 
-	public function clearCache(): void {
+	public function clearCache() : void {
 		if ($this->isCached()) {
 			FileManager::removeFile($this->packagesPath());
 			$this->packages()->clear();
 		}
 	}
 
-	public function packageNamed(string $name): ?Package {
+	public function packageNamed(string $name) : ?Package {
 		foreach ($this->packages() as $package) {
 			if ($package->name() == $name) {
 				return $package;
@@ -93,4 +93,3 @@ class Source {
 	}
 
 }
-

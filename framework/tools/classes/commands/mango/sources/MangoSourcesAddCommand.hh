@@ -6,7 +6,7 @@ class MangoSourcesAddCommand extends Command {
 		parent::__construct('add', 'adds a new source to the list of available sources', Vector {'url'});
 	}
 	
-	public function execute(Vector<string> $args): int {
+	public function execute(Vector<string> $args) : int {
 		return 0;
 	}
 	

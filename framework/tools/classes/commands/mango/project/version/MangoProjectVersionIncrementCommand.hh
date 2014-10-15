@@ -6,7 +6,7 @@ class MangoProjectVersionIncrementCommand extends Command {
 		parent::__construct('increment', 'increments the current project version', Vector {'change'});
 	}
 	
-	public function execute(Vector<string> $args): int {
+	public function execute(Vector<string> $args) : int {
 		return 0;
 	}
 	

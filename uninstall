@@ -5,11 +5,11 @@
 define('MANGO_INSTALL_PATH', '/usr/lib/mango');
 define('MANGO_BINARY_PATH', '/usr/bin/mango');
 
-function printLn(string $line): void {
+function printLn(string $line) : void {
 	printf("%s\n", $line);
 }
 
-function usage(string $message): void {
+function usage(string $message) : void {
 	printLn("   uninstall: $message");
 	printLn("       usage: uninstall [-y|--yes]");
 	printLn("");
@@ -19,12 +19,12 @@ function usage(string $message): void {
 	exit(1);
 }
 
-function error(string $message): void {
+function error(string $message) : void {
 	printLn("fatal error: $message");
 	exit(1);
 }
 
-function removeDirectory(string $path): void {
+function removeDirectory(string $path) : void {
 	if (file_exists($path)) {
 		$dir = scandir($path);
 		foreach ($dir as $f) {
@@ -41,7 +41,7 @@ function removeDirectory(string $path): void {
 	}
 }
 
-function proceed(string $message, bool $skip = false): bool {
+function proceed(string $message, bool $skip = false) : bool {
 	if (!$skip) {
 		printf("%s [Y/n] ", $message);
 		$stdin = fopen('php://stdin', 'r');
@@ -84,4 +84,3 @@ if (proceed('Do you wish to proceed with the uninstallation?', $NON_INTERACTIVE_
 } else {
 	printLn("Aborted!");
 }
-

@@ -19,4 +19,3 @@ class PackageException extends Exception {
 	}
 
 }
-

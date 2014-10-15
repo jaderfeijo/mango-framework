@@ -8,11 +8,11 @@ define('MANGO_BINARY_PATH', '/usr/bin/mango');
 define('MANGO_LIBRARY_FOLDER', 'library');
 define('MANGO_FRAMEWORK_FOLDER', 'framework');
 
-function printLn(string $line): void {
+function printLn(string $line) : void {
 	printf("%s\n", $line);
 }
 
-function usage(string $message): void {
+function usage(string $message) : void {
 	printLn("     install: $message");
 	printLn("       usage: install [-y|--yes] [-c|--channel=channel]");
 	printLn("");
@@ -23,18 +23,18 @@ function usage(string $message): void {
 	exit(1);
 }
 
-function error(string $message): void {
+function error(string $message) : void {
 	printLn("fatal error: $message");
 	cleanup();
 	exit(1);
 }
 
-function cleanup(): void {
+function cleanup() : void {
 	printLn("* Cleaning up...");
 	removeDirectory(MANGO_TEMP_PATH);
 }
 
-function removeDirectory(string $path): void {
+function removeDirectory(string $path) : void {
 	if (file_exists($path)) {
 		$dir = scandir($path);
 		foreach ($dir as $f) {
@@ -51,7 +51,7 @@ function removeDirectory(string $path): void {
 	}
 }
 
-function copyDirectory(string $source, string $destination): void {
+function copyDirectory(string $source, string $destination) : void {
 	if (!file_exists($destination)) {
 		mkdir($destination, 0777, true);
 	}
@@ -69,7 +69,7 @@ function copyDirectory(string $source, string $destination): void {
 	}
 }
 
-function proceed(string $message, bool $skip = false): bool {
+function proceed(string $message, bool $skip = false) : bool {
 	if (!$skip) {
 		printf("%s [Y/n] ", $message);
 		$stdin = fopen('php://stdin', 'r');
@@ -84,7 +84,7 @@ function proceed(string $message, bool $skip = false): bool {
 	}
 }
 
-function downloadFile(string $url, string $path): bool {
+function downloadFile(string $url, string $path) : bool {
 	$file = fopen($path, 'w');
 	$curl = curl_init($url);
 	curl_setopt($curl, CURLOPT_TIMEOUT, 50);
@@ -96,7 +96,7 @@ function downloadFile(string $url, string $path): bool {
 	return $success;
 }
 
-function extractPackage(string $package, string $output): bool {
+function extractPackage(string $package, string $output) : bool {
 	$archive = new ZipArchive();
 	if ($archive->open($package)) {
 		$archive->extractTo($output);

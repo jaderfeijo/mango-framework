@@ -4,7 +4,7 @@ class PackageManager {
 	
 	protected static ?PackageManager $_sharedManager = null;
 
-	public static function sharedManager(): PackageManager {
+	public static function sharedManager() : PackageManager {
 		if (self::$_sharedManager == null) {
 			self::$_sharedManager = new PackageManager();
 		}	
@@ -23,17 +23,17 @@ class PackageManager {
 
 	/******************* Properties ********************/
 
-	public function temporaryPath(): string {
+	public function temporaryPath() : string {
 		return $this->_temporaryPath;
 	}
 
-	public function setTemporaryPath(string $temporaryPath): void {
+	public function setTemporaryPath(string $temporaryPath) : void {
 		$this->_temporaryPath = $temporaryPath;
 	}
 
 	/****************** Dynamic Properties ******************/
 
-	public function cachesPath(): string {
+	public function cachesPath() : string {
 		return $this->temporaryPath().'/caches';
 	}
 
@@ -55,7 +55,7 @@ class PackageManager {
 		return $this->_sources;
 	}
 
-	public function libraries(): Vector<Library> {
+	public function libraries() : Vector<Library> {
 		if ($this->_libraries->isEmpty()) {
 			$this->_libraries->clear();
 			$dir = scandir(MangoSystem::system()->libraryHome());
@@ -74,11 +74,11 @@ class PackageManager {
 
 	/***************** Protected Methods *************/
 
-	protected function sourcesPath(): string {
+	protected function sourcesPath() : string {
 		return MangoSystem::system()->frameworkHome().'/SOURCES';
 	}
 
-	protected function saveSources(): void {
+	protected function saveSources() : void {
 		$file = fopen($this->sourcesPath(), 'w');
 		foreach ($this->sources() as $source) {
 			fwrite($file, $source->name().' '.$source->url()."\n");
@@ -88,17 +88,17 @@ class PackageManager {
 
 	/***************** Methods ********************/
 
-	public function addSource(Source $source): void {
+	public function addSource(Source $source) : void {
 		$this->sources()->add($source);
 		$this->saveSources();
 	}
 
-	public function removeSource(Source $source): void {
+	public function removeSource(Source $source) : void {
 		$this->sources()->removeKey($this->sources()->linearSearch($source));
 		$this->saveSources();
 	}
 
-	public function sourceNamed(string $name): ?Source {
+	public function sourceNamed(string $name) : ?Source {
 		foreach($this->sources() as $source) {
 			if ($source->name() == $name) {
 				return $source;
@@ -107,7 +107,7 @@ class PackageManager {
 		return null;
 	}
 
-	public function libraryNamed(string $name): ?Library {
+	public function libraryNamed(string $name) : ?Library {
 		foreach($this->libraries() as $library) {
 			if ($library->name() == $name) {
 				return $library;
@@ -116,9 +116,8 @@ class PackageManager {
 		return null;
 	}
 
-	public function clearCache(): void {
+	public function clearCache() : void {
 		FileManager::removeDirectory($this->cachesPath());
 	}
 
 }
-
