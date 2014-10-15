@@ -55,3 +55,4 @@ sudo ./install -y
 echo '****************** Finishing up ******************'
 sudo echo 'cd /vagrant' >> /home/vagrant/.bashrc
 echo "All done!"
+

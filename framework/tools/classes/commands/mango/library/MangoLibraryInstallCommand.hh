@@ -77,3 +77,4 @@ class MangoLibraryInstallCommand extends Command {
 	}
 	
 }
+

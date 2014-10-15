@@ -11,3 +11,4 @@ class MangoProjectInfoCommand extends Command {
 	}
 	
 }
+

@@ -84,3 +84,4 @@ if (proceed('Do you wish to proceed with the uninstallation?', $NON_INTERACTIVE_
 } else {
 	printLn("Aborted!");
 }
+

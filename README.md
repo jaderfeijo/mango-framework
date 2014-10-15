@@ -81,3 +81,4 @@ PayPal: jader.feijo@gmail.com
 Thank you for using Mango Framework!
 
 We hope you enjoy it!
+

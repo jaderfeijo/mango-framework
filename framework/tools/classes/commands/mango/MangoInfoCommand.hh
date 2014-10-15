@@ -11,4 +11,5 @@ class MangoInfoCommand extends Command {
 		return 0;
 	}
 	
-}
+} 
+

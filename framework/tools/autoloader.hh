@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 define('AL_CLASSES_FOLDER', 'classes');
 define('AL_CLASS_EXTENSION', 'hh');
@@ -36,3 +36,4 @@ function find_class_path(string $className, ?string $path = null) : ?string {
 
 	return null;
 }
+

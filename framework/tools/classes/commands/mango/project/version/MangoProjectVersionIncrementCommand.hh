@@ -11,3 +11,4 @@ class MangoProjectVersionIncrementCommand extends Command {
 	}
 	
 }
+

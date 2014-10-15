@@ -11,3 +11,4 @@ class MangoSourcesRemoveCommand extends Command {
 	}
 	
 }
+

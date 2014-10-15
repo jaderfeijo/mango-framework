@@ -40,3 +40,4 @@ class MangoLibraryUninstallCommand extends Command {
 	}
 	
 }
+

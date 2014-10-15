@@ -11,3 +11,4 @@ class MangoLibraryUpdateCommand extends Command {
 	}
 	
 }
+

@@ -99,3 +99,4 @@ class CommandCollection extends Command {
 	}
 
 }
+

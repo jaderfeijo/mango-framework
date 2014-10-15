@@ -11,3 +11,4 @@ class MangoSourcesListCommand extends Command {
 	}
 	
 }
+

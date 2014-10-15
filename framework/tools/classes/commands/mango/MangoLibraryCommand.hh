@@ -12,3 +12,4 @@ class MangoLibraryCommand extends CommandCollection {
 	}
 	
 }
+
