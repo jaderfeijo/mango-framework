@@ -24,32 +24,43 @@ class MangoLibraryInstallCommand extends Command {
 		
 		$success = false;
 		if ($libraryName != null) {
-			$source = PackageManager::sharedManager()->sourceNamed($sourceName);
-			if ($source != null) {
-				Console::stdout()->printLn("* Fetching libraries for source '".$sourceName."'");
-				$source->fetch();
+			$archive = null;
 
-				$package = $source->packageNamed($libraryName);
-				if ($package != null) {
-					try {
-						Console::stdout()->printLn("* Downloading latest version of library '".$libraryName."' from '".$package->archiveURLForVersion($version)."'");
-						$package->fetch($version);
-
-						Console::stdout()->printLn("* Extracting package...");
-						$package->extract($version);
-
-						Console::stdout()->printLn("* Installing library...");
-						$package->install($version);
-
-						$success = true;
-					} catch (Exception $e) {
-						Console::stdout()->printException($e);
+			if ($sourceName == '.') {
+				$archive = new Archive($libraryName, $sourceName);
+			} else {
+				$source = PackageManager::sharedManager()->sourceNamed($sourceName);
+				if ($source != null) {
+					Console::stdout()->printLn("* Fetching libraries for source '".$sourceName."'");
+					$source->fetch();
+					
+					$package = $source->packageNamed($libraryName);
+					if ($package != null) {
+						try {
+							Console::stdout()->printLn("* Downloading latest version of library '".$libraryName."' from '".$package->packageURLForVersion($version)."'");
+							$package->fetch($version);
+	
+							Console::stdout()->printLn("* Extracting package...");
+							$package->extract($version);
+	
+							$archive = $package->archiveForVersion($version);
+						} catch (Exception $e) {
+							Console::stdout()->printException($e);
+						}
+					} else {
+						Console::stdout()->printLn("Could not find package for library named '".$libraryName."'!");
 					}
 				} else {
-					Console::stdout()->printLn("Could not find package for library named '".$libraryName."'!");
+					Console::stdout()->printLn("Could not find source named '".$sourceName."'!");
 				}
+			}
+			
+			if ($archive != null) {
+				Console::stdout()->printLn("* Installing library...");
+				$archive->install();
+				$success = true;
 			} else {
-				Console::stdout()->printLn("Could not find source named '".$sourceName."'!");
+				Console::stdout()->printLn("The archive could not be found!");
 			}
 		} else {
 			Console::stdout()->printLn("Error parsing library name!");

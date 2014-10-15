@@ -5,7 +5,7 @@ class Package {
 	public static function parse(Source $source, string $package) : ?Package {
 		$s = explode(' ', $package);
 		if (count($s) >= 3) {
-			return new Package($source, $s[0], $s[1], $s[2]);
+			return new Package($source, trim($s[0]), trim($s[1]), trim($s[2]));
 		} else {
 			return null;
 		}
@@ -43,34 +43,26 @@ class Package {
 
 	/**************** Protected Methods *****************/
 
-	protected function archiveURL(string $channel) : string {
+	protected function packageURL(string $channel) : string {
 		return str_replace('{CHANNEL}', $channel, $this->url());
 	}
 
-	protected function archivePath(string $channel) : string {
+	protected function packagePath(string $channel) : string {
 		return $this->source()->cachesPath().'/'.$this->name().'-'.$channel.'.zip';
 	}
 
-	protected function packagePath(string $channel) : string {
+	protected function archivePath(string $channel) : string {
 		return $this->source()->cachesPath().'/'.$this->name().'-'.$channel;
 	}
 
 	/**************** Methods *****************/
 
-	public function archiveURLForVersion(?Version $version) : string {
+	public function packageURLForVersion(?Version $version) : string {
 		$channel = $this->channel();
 		if ($version != null) {
 			$channel = $version->shortVersionString();
 		}
-		return $this->archiveURL($channel);
-	}
-
-	public function archivePathForVersion(?Version $version) : string {
-		$channel = $this->channel();
-		if ($version != null) {
-			$channel = $version->shortVersionString();
-		}
-		return $this->archivePath($channel);
+		return $this->packageURL($channel);
 	}
 
 	public function packagePathForVersion(?Version $version) : string {
@@ -81,53 +73,36 @@ class Package {
 		return $this->packagePath($channel);
 	}
 
-	public function hasArchiveForVersion(?Version $version) : bool {
-		return file_exists($this->archivePathForVersion($version));
+	public function archivePathForVersion(?Version $version) : string {
+		$channel = $this->channel();
+		if ($version != null) {
+			$channel = $version->shortVersionString();
+		}
+		return $this->archivePath($channel);
 	}
 
 	public function hasPackageForVersion(?Version $version) : bool {
 		return file_exists($this->packagePathForVersion($version));
 	}
 
+	public function hasArchiveForVersion(?Version $version) : bool {
+		return file_exists($this->archivePathForVersion($version));
+	}
+
 	public function fetch(?Version $version) : void {
-		if (!$this->hasArchiveForVersion($version)) {
-			FileManager::downloadFile($this->archiveURLForVersion($version), $this->archivePathForVersion($version));
+		if (!$this->hasPackageForVersion($version)) {
+			FileManager::downloadFile($this->packageURLForVersion($version), $this->packagePathForVersion($version));
 		}
 	}
 
 	public function extract(?Version $version) : void {
-		if (!$this->hasPackageForVersion($version)) {
-			FileManager::extractPackage($this->archivePathForVersion($version), $this->source()->cachesPath());
+		if (!$this->hasArchiveForVersion($version)) {
+			FileManager::extractPackage($this->packagePathForVersion($version), $this->source()->cachesPath());
 		}
 	}
 
-	public function install(?Version $version) : void {
-		$packagePath = $this->packagePathForVersion($version);
-		if (file_exists($packagePath)) {
-			$packageVersion = Version::parseFromFilesInPath($packagePath);
-			if ($packageVersion != null) {
-				$library = PackageManager::sharedManager()->libraryNamed($this->name());
-				if ($library != null) {
-					if ($library->isVersionInstalled($packageVersion)) {
-						$library->uninstall($packageVersion);
-					}
-				}
+	public function archiveForVersion(?Version $version) : Archive {
+		return new Archive($this->name(), $this->archivePathForVersion($version));
+	}
 	
-				$libraryPath = Library::pathForLibrary($this->name(), $packageVersion);
-				FileManager::copyDirectory($packagePath, $libraryPath);
-
-				$library = PackageManager::sharedManager()->libraryNamed($this->name());
-				if ($library !== null) {
-					$library->updateSymbolicLinks();
-				} else {
-					throw new PackageException($this, PackageException::POST_INSTALLATION_ERROR);
-				}
-			} else {
-				throw new PackageException($this, PackageException::CORRUPTED_PACKAGE_ERROR);
-			}
-		} else {
-			throw new PackageException($this, PackageException::PACKAGE_NOT_FOUND_ERROR);
-		}
-	}
-
 }
