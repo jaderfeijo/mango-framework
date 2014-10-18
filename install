@@ -204,6 +204,17 @@ if (proceed('Do you wish to proceed with the installation?', $NON_INTERACTIVE_MO
 			}
 		}
 
+		printLn("* Installing 'mangoSystemLib'...");
+		if (file_exists('mangoSystemLib')) {
+			if (chdir('mangoSystemLib')) {
+				shell_exec('mango library install .:mangoSystemLib');
+			} else {
+				error("failed to enter 'mangoSystemLib' directory");
+			}
+		} else {
+			shell_exec('mango library install mangoSystemLib');
+		}
+
 		cleanup();
 
 		printLn("* All done!");

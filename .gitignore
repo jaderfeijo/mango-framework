@@ -1,3 +1,5 @@
 .vagrant
 *.swp
 mango/library
+mangoSystemLib
+
