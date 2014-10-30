@@ -8,7 +8,7 @@ spl_autoload_register('al_auto_load_class');
 function al_auto_load_class(string $class) : void {
 	$classPath = find_class_path($class);
 	if ($classPath !== null) {
-		include $classPath;
+		include($classPath);
 	}
 }
 

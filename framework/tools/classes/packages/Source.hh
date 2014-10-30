@@ -1,10 +1,10 @@
-<?hh // strict
+<?hh
 
 class Source {
 	
 	public static function parse(string $source) : ?Source {
-		$s = explode(' ', $source);
-		if (count($s) >= 2) {
+		$s = new Vector(explode(' ', $source));
+		if ($s->count() >= 2) {
 			return new Source($s[0], $s[1]);
 		} else {
 			return null;

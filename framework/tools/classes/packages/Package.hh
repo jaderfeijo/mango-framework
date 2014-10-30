@@ -1,10 +1,10 @@
-<?hh // strict
+<?hh
 
 class Package {
 
 	public static function parse(Source $source, string $package) : ?Package {
-		$s = explode(' ', $package);
-		if (count($s) >= 3) {
+		$s = new Vector(explode(' ', $package));
+		if ($s->count() >= 3) {
 			return new Package($source, trim($s[0]), trim($s[1]), trim($s[2]));
 		} else {
 			return null;
